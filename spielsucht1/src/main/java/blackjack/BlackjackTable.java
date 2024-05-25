@@ -14,10 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents the Blackjack game table with a graphical user interface.
+ */
 public class BlackjackTable extends JFrame implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
+
+    private static final long serialVersionUID = 1L;
+
     private final Deck deck;
     private final List<Card> playerHand;
     private final List<Card> dealerHand;
@@ -41,6 +44,9 @@ public class BlackjackTable extends JFrame implements Serializable {
     private JButton doubleDownHand1Button;
     private JButton doubleDownHand2Button;
 
+    /**
+     * Constructs the Blackjack table and initializes the game components.
+     */
     public BlackjackTable() {
         setTitle("Blackjack Table");
         setSize(800, 600);
@@ -71,7 +77,6 @@ public class BlackjackTable extends JFrame implements Serializable {
 
         hitHand1Button = new JButton("Hit Hand 1");
         hitHand2Button = new JButton("Hit Hand 2");
-        standButton = new JButton("Stand");
         doubleDownHand1Button = new JButton("Double Down Hand 1");
         doubleDownHand2Button = new JButton("Double Down Hand 2");
 
@@ -82,10 +87,13 @@ public class BlackjackTable extends JFrame implements Serializable {
         buttonPanel.add(doubleDownButton);
         buttonPanel.add(splitButton);
         add(buttonPanel, BorderLayout.SOUTH);
-        
+
         checkInitialBlackjack();
     }
 
+    /**
+     * Checks if there is an initial blackjack for the player or dealer.
+     */
     private void checkInitialBlackjack() {
         int playerValue = getHandValue(playerHand);
         int dealerValue = getHandValue(dealerHand);
@@ -98,7 +106,10 @@ public class BlackjackTable extends JFrame implements Serializable {
             resetGame();
         }
     }
-    
+
+    /**
+     * Deals the initial two cards to both player and dealer.
+     */
     private void dealInitialCards() {
         playerHand.add(deck.dealCard());
         playerHand.add(deck.dealCard());
@@ -106,12 +117,21 @@ public class BlackjackTable extends JFrame implements Serializable {
         dealerHand.add(deck.dealCard());
     }
 
+    /**
+     * Executes the dealer's turn, drawing cards until the dealer's hand value is at least 17.
+     */
     private void dealerTurn() {
         while (getHandValue(dealerHand) < 17) {
             dealerHand.add(deck.dealCard());
         }
     }
 
+    /**
+     * Calculates the total value of a given hand, adjusting for aces as necessary.
+     *
+     * @param hand the hand to calculate the value of
+     * @return the total value of the hand
+     */
     private int getHandValue(List<Card> hand) {
         int value = 0;
         int aceCount = 0;
@@ -128,6 +148,9 @@ public class BlackjackTable extends JFrame implements Serializable {
         return value;
     }
 
+    /**
+     * Checks if the player has busted, ending the game if so.
+     */
     private void checkPlayerBust() {
         if (getHandValue(playerHand) > 21) {
             JOptionPane.showMessageDialog(this, "You bust! Dealer wins.");
@@ -138,6 +161,9 @@ public class BlackjackTable extends JFrame implements Serializable {
         }
     }
 
+    /**
+     * Determines the winner of the game and displays the result.
+     */
     private void checkWinner() {
         int playerValue = getHandValue(playerHand);
         int dealerValue = getHandValue(dealerHand);
@@ -166,6 +192,9 @@ public class BlackjackTable extends JFrame implements Serializable {
         resetGame();
     }
 
+    /**
+     * Resets the game by shuffling the deck and dealing new initial cards.
+     */
     private void resetGame() {
         deck.shuffle();
         playerHand.clear();
@@ -184,6 +213,9 @@ public class BlackjackTable extends JFrame implements Serializable {
         tablePanel.repaint();
     }
 
+    /**
+     * Sets up the action listeners for the game buttons.
+     */
     private void setupButtonActions() {
         hitButton.addActionListener(new ActionListener() {
             @Override
@@ -243,7 +275,6 @@ public class BlackjackTable extends JFrame implements Serializable {
             }
         });
 
-
         doubleDownHand1Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -269,7 +300,6 @@ public class BlackjackTable extends JFrame implements Serializable {
                 checkPlayerBust();
             }
         });
-       
 
         doubleDownHand2Button.addActionListener(new ActionListener() {
             @Override
@@ -289,6 +319,9 @@ public class BlackjackTable extends JFrame implements Serializable {
         });
     }
 
+    /**
+     * Updates the buttons for the split hand scenario.
+     */
     private void updateButtonsForSplit() {
         buttonPanel.removeAll();
         buttonPanel.add(hitHand1Button);
@@ -300,6 +333,11 @@ public class BlackjackTable extends JFrame implements Serializable {
         buttonPanel.repaint();
     }
 
+    /**
+     * Loads the card images from the resources directory.
+     *
+     * @return a map of card image filenames to BufferedImage objects
+     */
     private Map<String, BufferedImage> loadCardImages() {
         Map<String, BufferedImage> images = new HashMap<>();
         String[] suits = {"hearts", "diamonds", "clubs", "spades"};
@@ -314,10 +352,14 @@ public class BlackjackTable extends JFrame implements Serializable {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading card images.");
         }
         return images;
     }
 
+    /**
+     * Custom JPanel class for drawing the game table and cards.
+     */
     private class TablePanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
@@ -387,6 +429,11 @@ public class BlackjackTable extends JFrame implements Serializable {
         }
     }
 
+    /**
+     * The main method to launch the Blackjack game.
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             BlackjackTable table = new BlackjackTable();
