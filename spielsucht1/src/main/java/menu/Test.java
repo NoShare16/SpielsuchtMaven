@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import blackjack.BlackjackTable;
+import roulette.Roulette;
 
 
 public class Test extends JFrame {
@@ -58,7 +59,8 @@ public class Test extends JFrame {
         rouletteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Roulette Button Clicked!");
+                Roulette roulette = new Roulette();
+                roulette.setVisible(true);
             }
         });
 
