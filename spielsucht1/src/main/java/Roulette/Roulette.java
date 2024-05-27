@@ -1,5 +1,4 @@
-package Roulette;
-
+package roulette;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +19,9 @@ public class Roulette extends JFrame {
             "35", "36"};
     private String[] redNumbers = {"1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", 
                                    "25", "27", "30", "32", "34", "36"};
-    
+    private String[] column1_34 = {"1", "4", "7", "10", "13", "16", "19", "22", "25", "28", "31", "34"};
+    private String[] column2_35 = {"2", "5", "8", "11", "14", "17", "20", "23", "26", "29", "32", "35"};
+    private String[] column3_36 = {"3", "6", "9", "12", "15", "18", "21", "24", "27", "30", "33", "36"};
     
     private int angle = 0;
     private Timer timer;
@@ -28,6 +29,7 @@ public class Roulette extends JFrame {
     private Color Green = new Color(0, 102, 0);
     private Color DarkRed = new Color(153, 0, 0);
     private Border buttonBorder = new LineBorder(Color.WHITE, 1);
+    private  Font font = new Font("Times New Roman", Font.BOLD, 20);
 
     public Roulette() {
         setTitle("Animated Roulette");
@@ -72,13 +74,16 @@ public class Roulette extends JFrame {
             rouletteButtons[i] = new JButton("" + i);
             if (rouletteNumbers[i].equals("0")) {
                 rouletteButtons[i].setBackground(Green);
-                rouletteButtons[i].setForeground(Color.WHITE); 
+                rouletteButtons[i].setForeground(Color.WHITE);
+                rouletteButtons[i].setFont(font);
             } else if (isRed(rouletteNumbersForButtons[i]) == "Red") {
                 rouletteButtons[i].setBackground(Color.RED);
-                rouletteButtons[i].setForeground(Color.WHITE); 
+                rouletteButtons[i].setForeground(Color.WHITE);
+                rouletteButtons[i].setFont(font);
             } else {
                 rouletteButtons[i].setBackground(Color.BLACK);
-                rouletteButtons[i].setForeground(Color.WHITE); // Weiße Schrift für schwarze Buttons
+                rouletteButtons[i].setForeground(Color.WHITE);
+                rouletteButtons[i].setFont(font);// Weiße Schrift für schwarze Buttons
             }
             rouletteButtons[i].setBorder(buttonBorder);
             roulettePanel.add(rouletteButtons[i]);
@@ -108,7 +113,7 @@ public class Roulette extends JFrame {
         twotoone1.setBounds(1100, 90, 70, 60);
         twotoone1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Eingabe = "2 to 1";
+				Eingabe = "1-34";
 			}
     	});
         
@@ -120,7 +125,7 @@ public class Roulette extends JFrame {
         twotoone2.setBounds(1100, 150, 70, 60);
         twotoone2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Eingabe = "2 to 1";
+				Eingabe = "2-35";
 			}
     	});
         
@@ -132,7 +137,7 @@ public class Roulette extends JFrame {
         twotoone3.setBounds(1100, 210, 70, 60);
         twotoone3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Eingabe = "2 to 1";
+				Eingabe = "3-36";
 			}
     	});
         
@@ -275,6 +280,37 @@ public class Roulette extends JFrame {
     	return "Odd";
     }
     
+    private String twotoone (String Input) {
+    	for (String columnNumber : column1_34) {
+            if (Input.equals(columnNumber))
+                return "1-34";
+        }
+    	for (String columnNumber : column2_35) {
+            if (Input.equals(columnNumber))
+                return "2-35";
+        }
+    	for (String columnNumber : column3_36) {
+            if (Input.equals(columnNumber))
+                return "3-36";
+        }
+    	return "";
+    }
+    
+    private String isBetween (int input) {
+    	if (1 <= input && input <= 12) {
+    		return "1st 12";
+    	} else if (13 <= input && input <= 24) {
+    		return "2nd 12";
+    	} else if (25 <= input && input <= 36) {
+    		return "3rd 12";
+    	} else if (1 <= input && input <= 18) {
+    		return "1 to 18";
+    	} else if (19 <= input && input <= 36) {
+    		return "19 to 36";
+    	}
+    	return "";
+    }
+    
     private void drawRoulette(Graphics g) {
         int radius = 170;
         int centerX = roulettePanel.getWidth() / 6;
@@ -314,6 +350,7 @@ public class Roulette extends JFrame {
         angle = 0;
         System.out.println(Eingabe);
         int position = (int) (Math.random() * rouletteNumbers.length);
+        shareResult(Integer.parseInt(rouletteNumbers[position]));
         timer = new Timer(15, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
@@ -326,27 +363,26 @@ public class Roulette extends JFrame {
         });
         timer.start();
     }
+    
+    private void shareResult(int result) {
+    	
+    }
 
     private void showResult(int resultIndex) {
-    	System.out.println("Die Zahl ist " + rouletteNumbers[resultIndex]);
         if(Eingabe == rouletteNumbers[resultIndex]) {
         	// Wird die Bedingung erfüllt
         } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
+        	// Wird die Bedingung erfüllt
         	System.out.println(isRed(rouletteNumbers[resultIndex]));
         } else if (Eingabe == isEven(rouletteNumbers[resultIndex])) {
+        	// Wird die Bedingung erfüllt
         	System.out.println(isEven(rouletteNumbers[resultIndex]));
-        } else if (Eingabe == "2 to 1") {
-        	
-        } else if (Eingabe == "1st 12") {
-        	
-        } else if (Eingabe == "2nd 12") {
-        	
-        } else if (Eingabe == "3rd 12") {
-        	
-        } else if (Eingabe == "1 to 18") {
-        	
-        } else if (Eingabe == "19 to 36") {
-        	
+        } else if (Eingabe == twotoone(rouletteNumbers[resultIndex])) {
+        	// Wird die Bedingung erfüllt
+        	System.out.println(rouletteNumbers[resultIndex]);
+        } else if (Eingabe == isBetween(Integer.parseInt(rouletteNumbers[resultIndex]))) {
+        	// Wird die Bedingung erfüllt
+        	System.out.println(isBetween(Integer.parseInt(rouletteNumbers[resultIndex])));
         }
     }
 
