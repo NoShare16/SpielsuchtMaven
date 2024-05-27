@@ -20,9 +20,10 @@ public class GamePollingService {
     private MongoClient client;
 
     public GamePollingService() {
-        client = MongoClients.create(Config.MONGO_CONNECTION_STRING);
+        client = MongoProvider.getClient();
         this.database = client.getDatabase("Spielsucht");
     }
+
 
     public List<Player> getCurrentPlayerBalances() {
         MongoCollection<Document> players = database.getCollection("players");

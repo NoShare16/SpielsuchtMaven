@@ -1,12 +1,27 @@
 package roulette;
 
 import javax.swing.*;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+
+import config.Config;
+
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 public class Roulette extends JFrame {
+	
+	private MongoClient mongoClient;
+    private MongoDatabase database;
+    private MongoCollection<Document> players;
+    
     private JLabel resultLabel;
     private JPanel roulettePanel;
     private String[] rouletteNumbers = {"0", "32", "15", "19", "4", "21", "2", "25", "17", "34", "6", "27",
@@ -32,11 +47,12 @@ public class Roulette extends JFrame {
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
 
     public Roulette() {
+    	
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        
+        initMongoDB();
 
         roulettePanel = new JPanel() {
             @Override
@@ -45,7 +61,10 @@ public class Roulette extends JFrame {
                 drawRoulette(g);
                 drawBall(g);
             }
+            
+            
         };
+        
 
         roulettePanel.setPreferredSize(new Dimension(1200, 600));
         roulettePanel.setBackground(Green);
@@ -65,6 +84,41 @@ public class Roulette extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+    private void initMongoDB() {
+        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); // Use Config or env variables
+        database = mongoClient.getDatabase("Roulette");
+        players = database.getCollection("players");
+    }
+    
+    private void updatePlayerBalance(int playerId, double change) {
+        // This is a simplified update function for player balances
+        Document player = players.find(new Document("playerId", playerId)).first();
+        if (player != null) {
+            double currentBalance = player.getDouble("balance");
+            players.updateOne(new Document("playerId", playerId), 
+                              new Document("$set", new Document("balance", currentBalance + change)));
+        }
+    }
+    
+    private void logBetAndResult(int playerId, double betAmount, String betColor, int betNumber, boolean win) {
+        // You could add more details as needed
+        Document betLog = new Document("playerId", playerId)
+                                    .append("betAmount", betAmount)
+                                    .append("win", win)
+                                    .append("betColor", betColor)
+                                    .append("betNumber", betNumber)
+                                    .append("timestamp", System.currentTimeMillis());
+        database.getCollection("bet_logs").insertOne(betLog);
+    }
+    
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (mongoClient != null) {
+            mongoClient.close();
+        }
     }
 
     private void drawButtons() {
