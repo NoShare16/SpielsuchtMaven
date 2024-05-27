@@ -1,6 +1,7 @@
 package roulette;
 
 import javax.swing.*;
+import database.GameSession;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -84,6 +85,35 @@ public class Roulette extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+    private void setupBettingInterface() {
+        JLabel betLabel = new JLabel("Bet Amount:");
+        betLabel.setForeground(Color.WHITE);
+        betLabel.setBounds(650, 490, 100, 25);
+        roulettePanel.add(betLabel);
+
+        JTextField betAmountField = new JTextField();
+        betAmountField.setBounds(750, 490, 100, 25);
+        roulettePanel.add(betAmountField);
+
+        JComboBox<String> betTypeBox = new JComboBox<>(new String[]{"Number", "Color", "Even", "Odd", "1st 12", "2nd 12", "3rd 12", "1 to 18", "19 to 36"});
+        betTypeBox.setBounds(860, 490, 140, 25);
+        roulettePanel.add(betTypeBox);
+
+        JButton placeBetButton = new JButton("Place Bet");
+        placeBetButton.setBounds(1010, 490, 100, 25);
+        roulettePanel.add(placeBetButton);
+
+        placeBetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int playerId = 1; // This should be dynamically set
+                double betAmount = Double.parseDouble(betAmountField.getText());
+                String betType = (String) betTypeBox.getSelectedItem();
+                // Additional logic to handle the bet based on user's selection
+                System.out.println("Bet placed: " + betAmount + " on " + betType);
+            }
+        });
     }
     
     private void initMongoDB() {
@@ -402,20 +432,44 @@ public class Roulette extends JFrame {
 
     private void spinRoulette() {
         angle = 0;
-        System.out.println(Eingabe);
-        int position = (int) (Math.random() * rouletteNumbers.length);
+        final int position = (int) (Math.random() * rouletteNumbers.length);  // Make position final to ensure it's thread-safe
         timer = new Timer(15, new ActionListener() {
+            private boolean resultLogged = false;  // Flag to control result logging
+
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
-                    timer.stop();
-                    showResult(position);
+                    if (!resultLogged) {  // Only log result once
+                        showResult(position);
+                        shareResult(Integer.parseInt(rouletteNumbers[position]));
+                        resultLogged = true;  // Set flag to true after logging
+                    }
+                    timer.stop();  // Ensure timer is stopped
                 }
                 roulettePanel.repaint();
             }
         });
         timer.start();
     }
+
+    
+    private void shareResult(int result) {
+        // Determine the color of the result using your existing method
+        String color = isRed(Integer.toString(result)).equals("Red") ? "Red" : "Black";
+
+        // Now pass both the result number and its color to logGameResult
+        logGameResult(result, color);
+    }
+
+    public void logGameResult(int resultNumber, String color) {
+        MongoCollection<Document> results = database.getCollection("results");
+        Document result = new Document()
+                            .append("resultNumber", resultNumber)
+                            .append("color", color);
+        results.insertOne(result);
+        System.out.println("Result logged: Number=" + resultNumber + ", Color=" + color);
+    }
+
 
     private void showResult(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
@@ -434,6 +488,7 @@ public class Roulette extends JFrame {
         	System.out.println(isBetween(Integer.parseInt(rouletteNumbers[resultIndex])));
         }
     }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
