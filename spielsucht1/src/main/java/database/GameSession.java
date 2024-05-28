@@ -1,14 +1,19 @@
 package database;
 
+import org.bson.types.ObjectId;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
 public class GameSession {
     private MongoDatabase database;
+    private final ObjectId fixedId = new ObjectId("6655b549631077568e9c23ee");
 
     public GameSession(MongoDatabase database) {
         this.database = database;
+        initializeFixedDocument();
     }
 
     public void addPlayer(int playerId, double balance) {
@@ -45,12 +50,29 @@ public class GameSession {
         System.out.println("Balance updated for player: " + playerId);
     }
     
-    public void logGameResult(int resultNumber, String color) {
-        MongoCollection<Document> results = database.getCollection("results");
-        Document result = new Document()
-                            .append("resultNumber", resultNumber)
-                            .append("color", color);
-        results.insertOne(result);
-        System.out.println("Result logged: Number=" + resultNumber + ", Color=" + color);
+    
+    public Document getBetById(String id) {
+        MongoCollection<Document> collection = database.getCollection("bet_logs");
+        return collection.find(new Document("_id", new ObjectId(id))).first();
+    }
+    
+    private void initializeFixedDocument() {
+        MongoCollection<Document> collection = database.getCollection("bet_logs");
+        Document existingDoc = collection.find(new Document("_id", fixedId)).first();
+        if (existingDoc == null) {
+            Document newDoc = new Document("_id", fixedId)
+                                .append("playerId", 1) // Example default data
+                                .append("betAmount", 0)
+                                .append("win", false);
+            collection.insertOne(newDoc);
+            System.out.println("Initialized fixed document with ID: " + fixedId);
+        }
+    }
+
+    public void updateFixedDocument(double betAmount, boolean win) {
+        MongoCollection<Document> collection = database.getCollection("bet_logs");
+        Document update = new Document("$set", new Document("betAmount", betAmount).append("win", win));
+        collection.updateOne(new Document("_id", fixedId), update);
+        System.out.println("Updated fixed document with ID: " + fixedId);
     }
 }

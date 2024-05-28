@@ -1,6 +1,8 @@
 package roulette;
 
 import javax.swing.*;
+import com.mongodb.client.model.UpdateOptions;
+import org.bson.types.ObjectId;
 import database.GameSession;
 
 import com.mongodb.client.MongoClient;
@@ -21,7 +23,13 @@ public class Roulette extends JFrame {
 	
 	private MongoClient mongoClient;
     private MongoDatabase database;
+    private ObjectId betLogId = new ObjectId("6655b549631077568e9c23ee");
     private MongoCollection<Document> players;
+    private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
+    private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
+    private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
+    private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
+
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -48,6 +56,7 @@ public class Roulette extends JFrame {
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
 
     public Roulette() {
+        
     	
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,6 +96,8 @@ public class Roulette extends JFrame {
         setVisible(true);
     }
     
+   
+    
     private void setupBettingInterface() {
         JLabel betLabel = new JLabel("Bet Amount:");
         betLabel.setForeground(Color.WHITE);
@@ -121,26 +132,17 @@ public class Roulette extends JFrame {
         database = mongoClient.getDatabase("Roulette");
         players = database.getCollection("players");
     }
-    
-    private void updatePlayerBalance(int playerId, double change) {
-        // This is a simplified update function for player balances
-        Document player = players.find(new Document("playerId", playerId)).first();
+    // hier unten schonmal die logik vorbereitet um die balance der players zu aktualisieren, fehlt noch die logik um die balance zu berechnen
+    private void updatePlayerBalance(ObjectId playerId, double change) {
+        Document player = players.find(new Document("_id", playerId)).first();
         if (player != null) {
             double currentBalance = player.getDouble("balance");
-            players.updateOne(new Document("playerId", playerId), 
+            players.updateOne(new Document("_id", playerId), 
                               new Document("$set", new Document("balance", currentBalance + change)));
+            System.out.println("Updated balance for player ID " + playerId.toHexString());
+        } else {
+            System.out.println("No player found with ID " + playerId.toHexString());
         }
-    }
-    
-    private void logBetAndResult(int playerId, double betAmount, String betColor, int betNumber, boolean win) {
-        // You could add more details as needed
-        Document betLog = new Document("playerId", playerId)
-                                    .append("betAmount", betAmount)
-                                    .append("win", win)
-                                    .append("betColor", betColor)
-                                    .append("betNumber", betNumber)
-                                    .append("timestamp", System.currentTimeMillis());
-        database.getCollection("bet_logs").insertOne(betLog);
     }
     
     @Override
@@ -462,12 +464,14 @@ public class Roulette extends JFrame {
     }
 
     public void logGameResult(int resultNumber, String color) {
-        MongoCollection<Document> results = database.getCollection("results");
-        Document result = new Document()
-                            .append("resultNumber", resultNumber)
-                            .append("color", color);
-        results.insertOne(result);
-        System.out.println("Result logged: Number=" + resultNumber + ", Color=" + color);
+        MongoCollection<Document> results = database.getCollection("bet_logs");
+        Document filter = new Document("_id", betLogId);
+        Document update = new Document("$set", new Document()
+            .append("resultNumber", resultNumber)
+            .append("color", color));
+
+        results.updateOne(filter, update);
+        System.out.println("Result updated: Number=" + resultNumber + ", Color=" + color);
     }
 
 
