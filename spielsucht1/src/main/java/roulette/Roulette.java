@@ -23,7 +23,7 @@ public class Roulette extends JFrame {
 	
 	private MongoClient mongoClient;
     private MongoDatabase database;
-    private ObjectId betLogId = new ObjectId("6655b549631077568e9c23ee");
+    private ObjectId resultsId = new ObjectId("6654e547b9c0aa7b62cc0229");
     private MongoCollection<Document> players;
     private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
@@ -54,6 +54,7 @@ public class Roulette extends JFrame {
     private Color DarkRed = new Color(153, 0, 0);
     private Border buttonBorder = new LineBorder(Color.WHITE, 1);
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
+    private boolean readyState = false;
 
     public Roulette() {
         
@@ -133,17 +134,20 @@ public class Roulette extends JFrame {
         players = database.getCollection("players");
     }
     // hier unten schonmal die logik vorbereitet um die balance der players zu aktualisieren, fehlt noch die logik um die balance zu berechnen
-    private void updatePlayerBalance(ObjectId playerId, double change) {
+    private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
         Document player = players.find(new Document("_id", playerId)).first();
         if (player != null) {
             double currentBalance = player.getDouble("balance");
-            players.updateOne(new Document("_id", playerId), 
-                              new Document("$set", new Document("balance", currentBalance + change)));
-            System.out.println("Updated balance for player ID " + playerId.toHexString());
+            Document update = new Document("$set", new Document("balance", change)
+                                                         .append("readyState", readyState));
+            players.updateOne(new Document("_id", playerId), update);
+            System.out.println("Updated balance and ready state for player ID " + playerId.toHexString());
         } else {
             System.out.println("No player found with ID " + playerId.toHexString());
         }
     }
+
+    
     
     @Override
     public void dispose() {
@@ -343,9 +347,11 @@ public class Roulette extends JFrame {
         readyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 spinRoulette();
+            //    randomRoll();
+                readyState = true;
+                updatePlayerData(PLAYER_1_ID, 1, readyState);
             }
         });
-        
         
     }
 
@@ -452,6 +458,7 @@ public class Roulette extends JFrame {
             }
         });
         timer.start();
+        readyState = false;
     }
 
     
@@ -464,8 +471,8 @@ public class Roulette extends JFrame {
     }
 
     public void logGameResult(int resultNumber, String color) {
-        MongoCollection<Document> results = database.getCollection("bet_logs");
-        Document filter = new Document("_id", betLogId);
+        MongoCollection<Document> results = database.getCollection("results");
+        Document filter = new Document("_id", resultsId);
         Document update = new Document("$set", new Document()
             .append("resultNumber", resultNumber)
             .append("color", color));
@@ -473,6 +480,22 @@ public class Roulette extends JFrame {
         results.updateOne(filter, update);
         System.out.println("Result updated: Number=" + resultNumber + ", Color=" + color);
     }
+    
+    /*private void randomRoll() {
+        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
+        boolean resultLogged = false;  // Flag to control result logging
+
+        if (!resultLogged) {
+            System.out.println("Random roll result: " + rouletteNumbers[position]);  // Displaying the result for example
+            showResult(position);  // Optionally show or handle the result in some way
+            shareResult(Integer.parseInt(rouletteNumbers[position]));  // You could still log or process the result similarly
+            
+            resultLogged = true;  // Set flag to true after processing
+        }
+        readyState = false;
+    }*/
+
+
 
 
     private void showResult(int resultIndex) {

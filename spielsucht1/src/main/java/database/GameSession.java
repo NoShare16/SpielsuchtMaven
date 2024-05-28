@@ -13,16 +13,8 @@ public class GameSession {
 
     public GameSession(MongoDatabase database) {
         this.database = database;
-        initializeFixedDocument();
     }
 
-    public void addPlayer(int playerId, double balance) {
-        MongoCollection<Document> collection = database.getCollection("players");
-        Document player = new Document("playerId", playerId)
-                                .append("balance", balance);
-        collection.insertOne(player);
-        System.out.println("Player added: " + playerId);
-    }
 
     public void logBet(int playerId, double betAmount, String betType, int betNumber, String color, boolean win, boolean ready) {
         MongoCollection<Document> bets = database.getCollection("bets");
@@ -51,28 +43,5 @@ public class GameSession {
     }
     
     
-    public Document getBetById(String id) {
-        MongoCollection<Document> collection = database.getCollection("bet_logs");
-        return collection.find(new Document("_id", new ObjectId(id))).first();
-    }
     
-    private void initializeFixedDocument() {
-        MongoCollection<Document> collection = database.getCollection("bet_logs");
-        Document existingDoc = collection.find(new Document("_id", fixedId)).first();
-        if (existingDoc == null) {
-            Document newDoc = new Document("_id", fixedId)
-                                .append("playerId", 1) // Example default data
-                                .append("betAmount", 0)
-                                .append("win", false);
-            collection.insertOne(newDoc);
-            System.out.println("Initialized fixed document with ID: " + fixedId);
-        }
-    }
-
-    public void updateFixedDocument(double betAmount, boolean win) {
-        MongoCollection<Document> collection = database.getCollection("bet_logs");
-        Document update = new Document("$set", new Document("betAmount", betAmount).append("win", win));
-        collection.updateOne(new Document("_id", fixedId), update);
-        System.out.println("Updated fixed document with ID: " + fixedId);
-    }
 }
