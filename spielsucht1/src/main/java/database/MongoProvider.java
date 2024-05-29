@@ -16,5 +16,5 @@ public class MongoProvider {
             }
         }
         return INSTANCE;
-    }
+    }
 }
