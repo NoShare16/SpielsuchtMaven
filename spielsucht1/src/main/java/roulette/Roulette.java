@@ -18,6 +18,7 @@ public class Roulette extends JFrame {
 	private MongoClient mongoClient;
     private MongoDatabase database;
     private ObjectId betLogId = new ObjectId("6655b549631077568e9c23ee");
+    private ObjectId resultsId = new ObjectId("6654e547b9c0aa7b62cc0229");
     private MongoCollection<Document> players;
     private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
