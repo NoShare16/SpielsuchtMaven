@@ -369,19 +369,20 @@ public class Roulette extends JFrame {
         int centerX = roulettePanel.getWidth() / 6;
         int centerY = roulettePanel.getHeight() / 2;
 
-        // Anzahl der Sektoren
-        int numberOfSectors = rouletteNumbers.length;
+//        g.setColor(Color.ORANGE);
+//        g.fillOval(centerX - radius, centerY - radius, radius , radius );
+//        g.setColor(Color.BLACK);
+//        g.fillOval(centerX + radius/2000, centerY + radius/2000, radius, radius);
 
-        for (int i = 0; i < numberOfSectors; i++) {
-            // Berechnung des Winkels in Radians. Die 0 soll oben sein, also fangen wir bei -90 Grad an.
-            double angleRadians = Math.toRadians((i * (360.0 / numberOfSectors)) - 90);
-            double nextAngleRadians = Math.toRadians(((i + 1) * (360.0 / numberOfSectors)) - 90);
+        for (int i = 0; i < rouletteNumbers.length; i++) {
+            double angleRadians = Math.toRadians(i * (360.0 / rouletteNumbers.length));
+            double nextAngleRadians = Math.toRadians((i + 1) * (360.0 / rouletteNumbers.length));
 
             // Berechnung der Eckpunkte der Sektoren
-            int x1 = (int) (centerX + Math.cos(angleRadians) * radius);
-            int y1 = (int) (centerY + Math.sin(angleRadians) * radius);
-            int x2 = (int) (centerX + Math.cos(nextAngleRadians) * radius);
-            int y2 = (int) (centerY + Math.sin(nextAngleRadians) * radius);
+            int x1 = (int) (centerX + -Math.sin(angleRadians) * radius);
+            int y1 = (int) (centerY + -Math.cos(angleRadians) * radius);
+            int x2 = (int) (centerX + -Math.sin(nextAngleRadians) * radius);
+            int y2 = (int) (centerY + -Math.cos(nextAngleRadians) * radius);
 
             // Füllung der Sektoren basierend auf der Farbe
             if ("Red".equals(isRed(rouletteNumbers[i]))) {
@@ -395,14 +396,15 @@ public class Roulette extends JFrame {
 
             // Zeichnen der Zahl
             double midAngleRadians = (angleRadians + nextAngleRadians) / 2;
-            int numberX = (int) (centerX + Math.cos(midAngleRadians) * (radius - 15) - 10);
-            int numberY = (int) (centerY + Math.sin(midAngleRadians) * (radius - 15) + 5);
+            int numberX = (int) (centerX + -Math.sin(midAngleRadians) * (radius - 15) - 10);
+            int numberY = (int) (centerY + -Math.cos(midAngleRadians) * (radius - 15) + 5);
             g.setColor(Color.WHITE);
             g.setFont(font);
             g.drawString(rouletteNumbers[i], numberX, numberY);
         }
+        
+        
     }
-
 
     private void drawBall(Graphics g) {
         int radius = 10;
