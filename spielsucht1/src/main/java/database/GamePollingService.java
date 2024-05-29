@@ -52,6 +52,6 @@ public class GamePollingService {
     public static void main(String[] args) {
         GamePollingService service = new GamePollingService();
         service.startPolling();
-    }
+    }
 }
-// test 3
+// test 3

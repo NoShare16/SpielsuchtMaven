@@ -1,12 +1,36 @@
 package roulette;
 
 import javax.swing.*;
+import com.mongodb.client.model.UpdateOptions;
+import org.bson.types.ObjectId;
+import database.GameSession;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+
+import config.Config;
+
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 public class Roulette extends JFrame {
+	
+	private MongoClient mongoClient;
+    private MongoDatabase database;
+    private ObjectId resultsId = new ObjectId("6654e547b9c0aa7b62cc0229");
+    private MongoCollection<Document> players;
+    private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
+    private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
+    private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
+    private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
+
+    
     private JLabel resultLabel;
     private JPanel roulettePanel;
     private String[] rouletteNumbers = {"0", "32", "15", "19", "4", "21", "2", "25", "17", "34", "6", "27",
@@ -30,13 +54,16 @@ public class Roulette extends JFrame {
     private Color DarkRed = new Color(153, 0, 0);
     private Border buttonBorder = new LineBorder(Color.WHITE, 1);
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
+    private boolean readyState = false;
 
     public Roulette() {
+        
+    	
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        
+        initMongoDB();
 
         roulettePanel = new JPanel() {
             @Override
@@ -45,7 +72,10 @@ public class Roulette extends JFrame {
                 drawRoulette(g);
                 drawBall(g);
             }
+            
+            
         };
+        
 
         roulettePanel.setPreferredSize(new Dimension(1200, 600));
         roulettePanel.setBackground(Green);
@@ -65,6 +95,66 @@ public class Roulette extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+   
+    
+    private void setupBettingInterface() {
+        JLabel betLabel = new JLabel("Bet Amount:");
+        betLabel.setForeground(Color.WHITE);
+        betLabel.setBounds(650, 490, 100, 25);
+        roulettePanel.add(betLabel);
+
+        JTextField betAmountField = new JTextField();
+        betAmountField.setBounds(750, 490, 100, 25);
+        roulettePanel.add(betAmountField);
+
+        JComboBox<String> betTypeBox = new JComboBox<>(new String[]{"Number", "Color", "Even", "Odd", "1st 12", "2nd 12", "3rd 12", "1 to 18", "19 to 36"});
+        betTypeBox.setBounds(860, 490, 140, 25);
+        roulettePanel.add(betTypeBox);
+
+        JButton placeBetButton = new JButton("Place Bet");
+        placeBetButton.setBounds(1010, 490, 100, 25);
+        roulettePanel.add(placeBetButton);
+
+        placeBetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int playerId = 1; // This should be dynamically set
+                double betAmount = Double.parseDouble(betAmountField.getText());
+                String betType = (String) betTypeBox.getSelectedItem();
+                // Additional logic to handle the bet based on user's selection
+                System.out.println("Bet placed: " + betAmount + " on " + betType);
+            }
+        });
+    }
+    
+    private void initMongoDB() {
+        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); // Use Config or env variables
+        database = mongoClient.getDatabase("Roulette");
+        players = database.getCollection("players");
+    }
+    // hier unten schonmal die logik vorbereitet um die balance der players zu aktualisieren, fehlt noch die logik um die balance zu berechnen
+    private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
+        Document player = players.find(new Document("_id", playerId)).first();
+        if (player != null) {
+            double currentBalance = player.getDouble("balance");
+            Document update = new Document("$set", new Document("balance", change)
+                                                         .append("readyState", readyState));
+            players.updateOne(new Document("_id", playerId), update);
+            System.out.println("Updated balance and ready state for player ID " + playerId.toHexString());
+        } else {
+            System.out.println("No player found with ID " + playerId.toHexString());
+        }
+    }
+
+    
+    
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (mongoClient != null) {
+            mongoClient.close();
+        }
     }
 
     private void drawButtons() {
@@ -257,9 +347,11 @@ public class Roulette extends JFrame {
         readyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 spinRoulette();
+            //    randomRoll();
+                readyState = true;
+                updatePlayerData(PLAYER_1_ID, 1, readyState);
             }
         });
-        
         
     }
 
@@ -348,25 +440,63 @@ public class Roulette extends JFrame {
 
     private void spinRoulette() {
         angle = 0;
-        System.out.println(Eingabe);
-        int position = (int) (Math.random() * rouletteNumbers.length);
-        shareResult(Integer.parseInt(rouletteNumbers[position]));
+        final int position = (int) (Math.random() * rouletteNumbers.length);  // Make position final to ensure it's thread-safe
         timer = new Timer(15, new ActionListener() {
+            private boolean resultLogged = false;  // Flag to control result logging
+
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
-                    timer.stop();
-                    showResult(position);
+                    if (!resultLogged) {  // Only log result once
+                        showResult(position);
+                        shareResult(Integer.parseInt(rouletteNumbers[position]));
+                        resultLogged = true;  // Set flag to true after logging
+                    }
+                    timer.stop();  // Ensure timer is stopped
                 }
                 roulettePanel.repaint();
             }
         });
         timer.start();
+        readyState = false;
     }
+
     
     private void shareResult(int result) {
-    	
+        // Determine the color of the result using your existing method
+        String color = isRed(Integer.toString(result)).equals("Red") ? "Red" : "Black";
+
+        // Now pass both the result number and its color to logGameResult
+        logGameResult(result, color);
     }
+
+    public void logGameResult(int resultNumber, String color) {
+        MongoCollection<Document> results = database.getCollection("results");
+        Document filter = new Document("_id", resultsId);
+        Document update = new Document("$set", new Document()
+            .append("resultNumber", resultNumber)
+            .append("color", color));
+
+        results.updateOne(filter, update);
+        System.out.println("Result updated: Number=" + resultNumber + ", Color=" + color);
+    }
+    
+    /*private void randomRoll() {
+        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
+        boolean resultLogged = false;  // Flag to control result logging
+
+        if (!resultLogged) {
+            System.out.println("Random roll result: " + rouletteNumbers[position]);  // Displaying the result for example
+            showResult(position);  // Optionally show or handle the result in some way
+            shareResult(Integer.parseInt(rouletteNumbers[position]));  // You could still log or process the result similarly
+            
+            resultLogged = true;  // Set flag to true after processing
+        }
+        readyState = false;
+    }*/
+
+
+
 
     private void showResult(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
@@ -385,12 +515,13 @@ public class Roulette extends JFrame {
         	System.out.println(isBetween(Integer.parseInt(rouletteNumbers[resultIndex])));
         }
     }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new Roulette();
             }
-        });
-    }
+        });
+    }
 }
