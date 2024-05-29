@@ -327,7 +327,7 @@ public class Roulette extends JFrame {
         readyButton.setBounds(930, 450, 100, 50);
         readyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                spinRoulette();
+                randomRoll();
             //    randomRoll();
                 readyState = true;
                 updatePlayerData(PLAYER_1_ID, 1, readyState);
@@ -414,9 +414,25 @@ public class Roulette extends JFrame {
         g.setColor(Color.YELLOW);
         g.fillOval(ballX - radius, ballY - radius, radius * 2, radius * 2);
     }
-    private void spinRoulette() {
+    
+    private void randomRoll() {
+        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
+        boolean resultLogged = false;  // Flag to control result logging
+        if (!resultLogged) {
+            System.out.println("Random roll result: " + rouletteNumbers[position]);
+           
+            logGameResult(position);// Displaying the result for example
+            spinRoulette(position);  // Optionally show or handle the result in some way
+              // You could still log or process the result similarly
+            
+            resultLogged = true;  // Set flag to true after processing
+        }
+    }
+    
+    
+    
+    private void spinRoulette(int position) {
         angle = 0;
-        final int position = (int) (Math.random() * rouletteNumbers.length);  // Make position final to ensure it's thread-safe
         timer = new Timer(15, new ActionListener() {
             private boolean resultLogged = false;  // Flag to control result logging
             public void actionPerformed(ActionEvent e) {
@@ -424,8 +440,6 @@ public class Roulette extends JFrame {
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
                     if (!resultLogged) {  // Only log result once
                         showResult(position);
-                        shareResult(Integer.parseInt(rouletteNumbers[position]));
-                        resultLogged = true;  // Set flag to true after logging
                     }
                     timer.stop();  // Ensure timer is stopped
                 }
@@ -437,37 +451,20 @@ public class Roulette extends JFrame {
     }
 
 
-    private void shareResult(int result) {
-        // Determine the color of the result using your existing method
-        String color = isRed(Integer.toString(result)).equals("Red") ? "Red" : "Black";
-        // Now pass both the result number and its color to logGameResult
-        logGameResult(result, color);
-    }
+    
 
-    public void logGameResult(int resultNumber, String color) {
+    public void logGameResult(int resultNumber) {
         
         MongoCollection<Document> results = database.getCollection("results");
         Document filter = new Document("_id", resultsId);
         Document update = new Document("$set", new Document()
-            .append("resultNumber", resultNumber)
-            .append("color", color));
+            .append("resultNumber", resultNumber));
 
         results.updateOne(filter, update);
-        System.out.println("Result updated: Number=" + resultNumber + ", Color=" + color);
+        System.out.println("Result updated: Number=" + resultNumber);
     }
 
-    /*private void randomRoll() {
-        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
-        boolean resultLogged = false;  // Flag to control result logging
-        if (!resultLogged) {
-            System.out.println("Random roll result: " + rouletteNumbers[position]);  // Displaying the result for example
-            showResult(position);  // Optionally show or handle the result in some way
-            shareResult(Integer.parseInt(rouletteNumbers[position]));  // You could still log or process the result similarly
-            
-            resultLogged = true;  // Set flag to true after processing
-        }
-        readyState = false;
-    }*/
+    
 
 
 
