@@ -448,6 +448,7 @@ public class Roulette extends JFrame {
         });
         timer.start();
         readyState = false;
+        updatePlayerData(PLAYER_1_ID, 1, readyState);
     }
 
 
