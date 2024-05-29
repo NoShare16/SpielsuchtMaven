@@ -496,7 +496,7 @@ public class Roulette extends JFrame {
     }*/
 
 
-
+//test
 
     private void showResult(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
