@@ -49,6 +49,9 @@ public class Roulette extends JFrame {
     private Border buttonBorder = new LineBorder(Color.WHITE, 1);
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
     private boolean readyState = false;
+    private double balance = 1000.00;
+    private double bet;
+    private JTextField EinsatzFeld = new JTextField();
 
     public Roulette() {
 
@@ -76,7 +79,6 @@ public class Roulette extends JFrame {
         EinsatzLabel.setBounds(650, 462, 150, 25);
         EinsatzLabel.setForeground(Color.WHITE);
         roulettePanel.add(EinsatzLabel);
-        JTextField EinsatzFeld = new JTextField();
         EinsatzFeld.setBounds(800, 462, 100, 25);
         roulettePanel.add(EinsatzFeld);
         drawButtons(); // Füge die Buttons zur Roulette-Tafel hinzu
@@ -86,31 +88,7 @@ public class Roulette extends JFrame {
     }
     
    
-    
-    private void setupBettingInterface() {
-        JLabel betLabel = new JLabel("Bet Amount:");
-        betLabel.setForeground(Color.WHITE);
-        betLabel.setBounds(650, 490, 100, 25);
-        roulettePanel.add(betLabel);
-        JTextField betAmountField = new JTextField();
-        betAmountField.setBounds(750, 490, 100, 25);
-        roulettePanel.add(betAmountField);
-        JComboBox<String> betTypeBox = new JComboBox<>(new String[]{"Number", "Color", "Even", "Odd", "1st 12", "2nd 12", "3rd 12", "1 to 18", "19 to 36"});
-        betTypeBox.setBounds(860, 490, 140, 25);
-        roulettePanel.add(betTypeBox);
-        JButton placeBetButton = new JButton("Place Bet");
-        placeBetButton.setBounds(1010, 490, 100, 25);
-        roulettePanel.add(placeBetButton);
-        placeBetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int playerId = 1; // This should be dynamically set
-                double betAmount = Double.parseDouble(betAmountField.getText());
-                String betType = (String) betTypeBox.getSelectedItem();
-                // Additional logic to handle the bet based on user's selection
-                System.out.println("Bet placed: " + betAmount + " on " + betType);
-            }
-        });
-    }
+  
     
     private void initMongoDB() {
         mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); // Use Config or env variables
@@ -328,9 +306,10 @@ public class Roulette extends JFrame {
         readyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 randomRoll();
-            //    randomRoll();
                 readyState = true;
                 updatePlayerData(PLAYER_1_ID, 1, readyState);
+                bet = Double.valueOf(EinsatzFeld.getText());
+                balance =- bet;
             }
         });
 
@@ -389,29 +368,52 @@ public class Roulette extends JFrame {
         int radius = 170;
         int centerX = roulettePanel.getWidth() / 6;
         int centerY = roulettePanel.getHeight() / 2;
-        g.setColor(Color.WHITE);
-        g.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
-        for (int i = 0; i < rouletteNumbers.length; i++) {
-            double angleRadians = Math.toRadians(i * (360.0 / rouletteNumbers.length));
-            int numberX = (int) (centerX + Math.cos(angleRadians) * (radius - 30) - 5);
-            int numberY = (int) (centerY + Math.sin(angleRadians) * (radius - 30) + 5);
-            if (isRed(rouletteNumbers[i]) == "Red")
+
+        // Anzahl der Sektoren
+        int numberOfSectors = rouletteNumbers.length;
+
+        for (int i = 0; i < numberOfSectors; i++) {
+            // Berechnung des Winkels in Radians. Die 0 soll oben sein, also fangen wir bei -90 Grad an.
+            double angleRadians = Math.toRadians((i * (360.0 / numberOfSectors)) - 90);
+            double nextAngleRadians = Math.toRadians(((i + 1) * (360.0 / numberOfSectors)) - 90);
+
+            // Berechnung der Eckpunkte der Sektoren
+            int x1 = (int) (centerX + Math.cos(angleRadians) * radius);
+            int y1 = (int) (centerY + Math.sin(angleRadians) * radius);
+            int x2 = (int) (centerX + Math.cos(nextAngleRadians) * radius);
+            int y2 = (int) (centerY + Math.sin(nextAngleRadians) * radius);
+
+            // Füllung der Sektoren basierend auf der Farbe
+            if ("Red".equals(isRed(rouletteNumbers[i]))) {
                 g.setColor(Color.RED);
-            else if (rouletteNumbers[i].equals("0"))
+            } else if (rouletteNumbers[i].equals("0")) {
                 g.setColor(Color.GREEN);
-            else
+            } else {
                 g.setColor(Color.BLACK);
+            }
+            g.fillPolygon(new int[]{centerX, x1, x2}, new int[]{centerY, y1, y2}, 3);
+
+            // Zeichnen der Zahl
+            double midAngleRadians = (angleRadians + nextAngleRadians) / 2;
+            int numberX = (int) (centerX + Math.cos(midAngleRadians) * (radius - 15) - 10);
+            int numberY = (int) (centerY + Math.sin(midAngleRadians) * (radius - 15) + 5);
+            g.setColor(Color.WHITE);
+            g.setFont(font);
             g.drawString(rouletteNumbers[i], numberX, numberY);
         }
     }
+
+
     private void drawBall(Graphics g) {
         int radius = 10;
         int centerX = roulettePanel.getWidth() / 6;
         int centerY = roulettePanel.getHeight() / 2;
+
         double angleRadians = Math.toRadians(angle);
-        int ballX = (int) (centerX + Math.cos(angleRadians) * (170 - radius));
-        int ballY = (int) (centerY + Math.sin(angleRadians) * (170 - radius));
-        g.setColor(Color.YELLOW);
+        int ballX = (int) (centerX + -Math.sin(angleRadians) * (140 - radius));
+        int ballY = (int) (centerY + -Math.cos(angleRadians) * (140 - radius));
+
+        g.setColor(Color.WHITE);
         g.fillOval(ballX - radius, ballY - radius, radius * 2, radius * 2);
     }
     
@@ -472,20 +474,17 @@ public class Roulette extends JFrame {
 
     private void showResult(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
-        	// Wird die Bedingung erfüllt
+        	balance =+ bet*35;
         } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
-        	// Wird die Bedingung erfüllt
-        	System.out.println(isRed(rouletteNumbers[resultIndex]));
+        	balance =+ bet*2;
         } else if (Eingabe == isEven(rouletteNumbers[resultIndex])) {
-        	// Wird die Bedingung erfüllt
-        	System.out.println(isEven(rouletteNumbers[resultIndex]));
+        	balance =+ bet*2;
         } else if (Eingabe == twotoone(rouletteNumbers[resultIndex])) {
-        	// Wird die Bedingung erfüllt
-        	System.out.println(rouletteNumbers[resultIndex]);
+        	balance =+ bet*3;
         } else if (Eingabe == isBetween(Integer.parseInt(rouletteNumbers[resultIndex]))) {
-        	// Wird die Bedingung erfüllt
-        	System.out.println(isBetween(Integer.parseInt(rouletteNumbers[resultIndex])));
-        }
+        	balance =+ bet*3;
+        } else
+        	bet = 0;
     }
     
     public static void main(String[] args) {
