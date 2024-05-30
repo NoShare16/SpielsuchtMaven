@@ -18,6 +18,10 @@ import java.awt.event.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 public class Roulette extends JFrame {
 
@@ -128,6 +132,21 @@ public class Roulette extends JFrame {
             }
         }
         return true; // All players are ready
+    }
+    
+    public void startReadyCheckPolling() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        Runnable checkReadyStatusTask = () -> {
+            System.out.println("Checking if all players are ready...");
+            boolean allReady = checkAllPlayersReady();
+            if (allReady) {
+                System.out.println("All players are ready. Starting game...");
+                
+            } else {
+                System.out.println("Not all players are ready.");
+            }
+        };
+        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
     }
 
 
