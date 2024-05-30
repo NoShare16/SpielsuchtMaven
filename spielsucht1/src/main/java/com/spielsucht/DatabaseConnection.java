@@ -1,4 +1,4 @@
-package com.spielsucht;
+/*package com.spielsucht;
 
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoClient;
@@ -19,3 +19,4 @@ public class DatabaseConnection {
         return database;
     }
 }
+*/

@@ -1,4 +1,4 @@
-package com.spielsucht;
+/*package com.spielsucht;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -28,3 +28,4 @@ public class GameSession {
         return collection.find(new Document("sessionId", sessionId)).into(new ArrayList<>());
     }
 }
+*/

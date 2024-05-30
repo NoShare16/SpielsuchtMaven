@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import roulette.Roulette;
+
 public class Menu extends JFrame {
 
     public Menu() {
@@ -64,7 +66,8 @@ public class Menu extends JFrame {
         rouletteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Roulette Button Clicked!");
+            	Roulette roulette = new Roulette();
+                roulette.setVisible(true);
             }
         });
 

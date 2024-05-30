@@ -1,4 +1,4 @@
-package com.spielsucht;
+/*package com.spielsucht;
 
 import org.bson.Document;
 
@@ -21,3 +21,4 @@ public class Main {
         }
     }
 }
+*/
