@@ -4,6 +4,8 @@ import javax.swing.*;
 
 import com.mongodb.client.model.UpdateOptions;
 import org.bson.types.ObjectId;
+
+import database.GamePollingService;
 import database.GameSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -22,8 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import database.GamePollingService;
+
 
 public class Roulette extends JFrame {
+	// private GamePollingService gamePollingService;
 
 	private MongoClient mongoClient;
     private MongoDatabase database;
@@ -67,7 +72,8 @@ public class Roulette extends JFrame {
 
     public Roulette() {
 
-    	
+    	//this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
+        
         
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -125,6 +131,7 @@ public class Roulette extends JFrame {
 
     private boolean checkAllPlayersReady() {
         ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
+        MongoCollection<Document> players = database.getCollection("players");
         for (ObjectId playerId : playerIds) {
             Document player = players.find(eq("_id", playerId)).first();
             if (player == null || !player.getBoolean("readyState", false)) {
@@ -133,6 +140,7 @@ public class Roulette extends JFrame {
         }
         return true; // All players are ready
     }
+
     
     public void startReadyCheckPolling() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -141,13 +149,14 @@ public class Roulette extends JFrame {
             boolean allReady = checkAllPlayersReady();
             if (allReady) {
                 System.out.println("All players are ready. Starting game...");
-                
+                // Potentially trigger an action to start the game
             } else {
                 System.out.println("Not all players are ready.");
             }
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
     }
+
 
 
 
@@ -534,6 +543,10 @@ public class Roulette extends JFrame {
     }
     
     public static void main(String[] args) {
+    	
+  //  	GamePollingService service = new GamePollingService();
+   // 	service.startReadyCheckPolling();
+    	
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new Roulette();

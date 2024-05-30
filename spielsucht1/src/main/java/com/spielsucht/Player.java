@@ -1,32 +1,51 @@
 package com.spielsucht;
 
-public class Player {
-    private int playerId;
-    private int balance;
+import org.bson.types.ObjectId;
 
-    public Player(int playerId, int balance) {
+public class Player {
+    private ObjectId playerId;
+    private double balance;
+    private boolean readyState;
+
+    // Constructor that matches the required signature
+    public Player(ObjectId playerId, double balance, boolean readyState) {
         this.playerId = playerId;
         this.balance = balance;
+        this.readyState = readyState;
     }
 
-    public int getPlayerId() {
+    // Getter and setter methods
+    public ObjectId getPlayerId() {
         return playerId;
     }
 
-    public void setPlayerId(int playerId) {
+    public void setPlayerId(ObjectId playerId) {
         this.playerId = playerId;
     }
 
-    public int getBalance() {
+    public double getBalance() {
         return balance;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(double balance) {
         this.balance = balance;
     }
 
+    public boolean isReadyState() {
+        return readyState;
+    }
+
+    public void setReadyState(boolean readyState) {
+        this.readyState = readyState;
+    }
+
+    // ToString method for debugging
     @Override
     public String toString() {
-        return "Player " + playerId + ": Balance = €" + balance;
+        return "Player{" +
+                "playerId=" + playerId +
+                ", balance=" + balance +
+                ", readyState=" + readyState +
+                '}';
     }
 }
