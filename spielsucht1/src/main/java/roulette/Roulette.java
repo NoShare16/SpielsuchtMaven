@@ -325,12 +325,12 @@ public class Roulette extends JFrame {
         readyButton.setBounds(930, 450, 100, 50);
         readyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                randomRoll();
-                readyState = true;
-                updatePlayerData(PLAYER_1_ID, 1, readyState);
+                
                 bet = Double.valueOf(EinsatzFeld.getText());
                 balance = balance - bet;
+                updatePlayerData(selectedPlayer, balance, true);
                 System.out.println(balance);
+                randomRoll();
             }
         });
 
@@ -468,7 +468,7 @@ public class Roulette extends JFrame {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
                     if (!resultLogged) {  // Only log result once
-                        showResult(position);
+                        calculateBalance(position);
                     }
                     timer.stop();  // Ensure timer is stopped
                 }
@@ -476,8 +476,7 @@ public class Roulette extends JFrame {
             }
         });
         timer.start();
-        readyState = false;
-        updatePlayerData(selectedPlayer, 1, readyState);
+        
     }
 
 
@@ -499,7 +498,7 @@ public class Roulette extends JFrame {
 
 
 
-    private void showResult(int resultIndex) {
+    private void calculateBalance(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
         	balance = balance + bet*35;
         } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
@@ -512,7 +511,7 @@ public class Roulette extends JFrame {
         	balance = balance + bet*3;
         } else
         	bet = 0;
-        System.out.println(balance);
+        updatePlayerData(selectedPlayer,balance, false);
     }
     
     public static void main(String[] args) {
