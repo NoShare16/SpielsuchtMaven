@@ -329,7 +329,7 @@ public class Roulette extends JFrame {
                 readyState = true;
                 updatePlayerData(PLAYER_1_ID, 1, readyState);
                 bet = Double.valueOf(EinsatzFeld.getText());
-                balance =- bet;
+                balance = balance - bet;
                 System.out.println(balance);
             }
         });
@@ -501,15 +501,15 @@ public class Roulette extends JFrame {
 
     private void showResult(int resultIndex) {
         if(Eingabe == rouletteNumbers[resultIndex]) {
-        	balance =+ bet*35;
+        	balance = balance + bet*35;
         } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
-        	balance =+ bet*2;
+        	balance = balance + bet*2;
         } else if (Eingabe == isEven(rouletteNumbers[resultIndex])) {
-        	balance =+ bet*2;
+        	balance = balance + bet*2;
         } else if (Eingabe == twotoone(rouletteNumbers[resultIndex])) {
-        	balance =+ bet*3;
+        	balance = balance + bet*3;
         } else if (Eingabe == isBetween(Integer.parseInt(rouletteNumbers[resultIndex]))) {
-        	balance =+ bet*3;
+        	balance = balance + bet*3;
         } else
         	bet = 0;
         System.out.println(balance);
