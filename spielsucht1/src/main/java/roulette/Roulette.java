@@ -1,5 +1,7 @@
 package roulette;
+
 import javax.swing.*;
+
 import com.mongodb.client.model.UpdateOptions;
 import org.bson.types.ObjectId;
 import database.GameSession;
@@ -9,21 +11,27 @@ import com.mongodb.client.MongoDatabase;
 import config.Config;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import static com.mongodb.client.model.Filters.eq;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+
+
 public class Roulette extends JFrame {
 
 	private MongoClient mongoClient;
     private MongoDatabase database;
-    private ObjectId betLogId = new ObjectId("6655b549631077568e9c23ee");
+    
     private ObjectId resultsId = new ObjectId("6654e547b9c0aa7b62cc0229");
+    
     private MongoCollection<Document> players;
     private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
+    private ObjectId selectedPlayer = PLAYER_1_ID;
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -56,6 +64,7 @@ public class Roulette extends JFrame {
     public Roulette() {
 
     	
+        
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -108,6 +117,17 @@ public class Roulette extends JFrame {
         } else {
             System.out.println("No player found with ID " + playerId.toHexString());
         }
+    }
+
+    private boolean checkAllPlayersReady() {
+        ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
+        for (ObjectId playerId : playerIds) {
+            Document player = players.find(eq("_id", playerId)).first();
+            if (player == null || !player.getBoolean("readyState", false)) {
+                return false; // If any player is not ready, return false
+            }
+        }
+        return true; // All players are ready
     }
 
 
@@ -310,6 +330,7 @@ public class Roulette extends JFrame {
                 updatePlayerData(PLAYER_1_ID, 1, readyState);
                 bet = Double.valueOf(EinsatzFeld.getText());
                 balance =- bet;
+                System.out.println(balance);
             }
         });
 
@@ -420,17 +441,21 @@ public class Roulette extends JFrame {
     }
     
     private void randomRoll() {
-        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
-        boolean resultLogged = false;  // Flag to control result logging
-        if (!resultLogged) {
-            System.out.println("Random roll result: " + rouletteNumbers[position]);
-           
-            logGameResult(position);// Displaying the result for example
-            spinRoulette(position);  // Optionally show or handle the result in some way
-              // You could still log or process the result similarly
-            
-            resultLogged = true;  // Set flag to true after processing
-        }
+    	if (checkAllPlayersReady()) {
+	        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
+	        boolean resultLogged = false;  // Flag to control result logging
+	        if (!resultLogged) {
+	            System.out.println("Random roll result: " + rouletteNumbers[position]);
+	           
+	            logGameResult(position);// Displaying the result for example
+	            spinRoulette(position);  // Optionally show or handle the result in some way
+	              // You could still log or process the result similarly
+	            
+	            resultLogged = true;  // Set flag to true after processing
+	        }
+    	} else {
+    		System.out.println("Not all players are ready.");
+    	}
     }
     
     
@@ -452,7 +477,7 @@ public class Roulette extends JFrame {
         });
         timer.start();
         readyState = false;
-        updatePlayerData(PLAYER_1_ID, 1, readyState);
+        updatePlayerData(selectedPlayer, 1, readyState);
     }
 
 
@@ -487,6 +512,7 @@ public class Roulette extends JFrame {
         	balance =+ bet*3;
         } else
         	bet = 0;
+        System.out.println(balance);
     }
     
     public static void main(String[] args) {
