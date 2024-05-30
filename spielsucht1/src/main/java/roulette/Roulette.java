@@ -31,7 +31,7 @@ public class Roulette extends JFrame {
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
-    private ObjectId selectedPlayer = PLAYER_1_ID;
+    private ObjectId selectedPlayer = PLAYER_2_ID;
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
