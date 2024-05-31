@@ -33,7 +33,7 @@ public class Roulette extends JFrame {
 	private MongoClient mongoClient;
     private MongoDatabase database;
     
-    private ObjectId resultsId = new ObjectId("6654e547b9c0aa7b62cc0229");
+    private ObjectId resultsId = new ObjectId("6659d0462e715afd57fd337b");
     
     private MongoCollection<Document> players;
     private static final ObjectId PLAYER_1_ID = new ObjectId("66560a546ab1d7f2d5fbc326");
@@ -163,6 +163,24 @@ public class Roulette extends JFrame {
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
     }
+    
+    public int fetchResults() {
+        MongoCollection<Document> results = database.getCollection("results");
+
+        // Fetches the document but does not delete it
+        Document resultDocument = results.find(eq("_id", resultsId)).first();
+
+        if (resultDocument != null) {
+            int result = resultDocument.getInteger("resultNumber", -1); // Using -1 as default if field not found
+            calculateBalance(result);
+            return result;
+        } else {
+            System.out.println("No result found for ID: " + resultsId.toHexString());
+            return -1;  // Returning -1 to indicate no result was found
+        }
+    }
+
+
 
 
 
@@ -503,7 +521,7 @@ public class Roulette extends JFrame {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
                     if (!resultLogged) {  // Only log result once
-                        calculateBalance(position);
+                        fetchResults();
                     }
                     timer.stop();  // Ensure timer is stopped
                 }
@@ -530,7 +548,7 @@ public class Roulette extends JFrame {
 
     
 
-
+    
 
 
     private void calculateBalance(int resultIndex) {
