@@ -28,7 +28,7 @@ import database.GamePollingService;
 
 
 public class Roulette extends JFrame {
-	// private GamePollingService gamePollingService;
+	 private GamePollingService gamePollingService;
 
 	private MongoClient mongoClient;
     private MongoDatabase database;
@@ -72,7 +72,7 @@ public class Roulette extends JFrame {
 
     public Roulette() {
 
-    	//this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
+    	this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
     	
         
         setTitle("Animated Roulette");
@@ -93,6 +93,9 @@ public class Roulette extends JFrame {
         updatePlayerData(PLAYER_2_ID, 1000, false);
         updatePlayerData(PLAYER_3_ID, 1000, false);
         updatePlayerData(PLAYER_4_ID, 1000, false);
+        
+        GamePollingService service = new GamePollingService();
+    	service.startReadyCheckPolling();
         
         roulettePanel.setPreferredSize(new Dimension(1200, 600));
         roulettePanel.setBackground(Green);
@@ -548,9 +551,6 @@ public class Roulette extends JFrame {
     
     public static void main(String[] args) {
     	
-    	
-  //  	GamePollingService service = new GamePollingService();
-   // 	service.startReadyCheckPolling();
     	
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

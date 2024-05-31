@@ -33,7 +33,7 @@ public class GamePollingService {
         this.database = client.getDatabase("Roulette");
     }
     
-    public List<Player> getCurrentPlayerBalances() {
+  /*  public List<Player> getCurrentPlayerBalances() {
         MongoCollection<Document> players = database.getCollection("players");
         List<Player> playerList = new ArrayList<>();
 
@@ -61,9 +61,9 @@ public class GamePollingService {
     public static void main(String[] args) {
         GamePollingService service = new GamePollingService();
         service.startPolling();
-    }
+    }*/
     
-   /* public boolean checkAllPlayersReady() {
+    public boolean checkAllPlayersReady() {
         ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
         MongoCollection<Document> players = database.getCollection("players");
         for (ObjectId playerId : playerIds) {
@@ -89,5 +89,5 @@ public class GamePollingService {
             }
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
-    }*/
+    }
 }
