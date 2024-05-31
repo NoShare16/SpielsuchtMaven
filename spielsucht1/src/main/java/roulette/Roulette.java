@@ -73,7 +73,7 @@ public class Roulette extends JFrame {
     public Roulette() {
 
     	//this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
-        
+    	
         
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -86,9 +86,13 @@ public class Roulette extends JFrame {
                 drawRoulette(g);
                 drawBall(g);
             }
-            
-            
         };
+        
+        // initial alle auf false setzen
+        updatePlayerData(PLAYER_1_ID, 1000, false);
+        updatePlayerData(PLAYER_2_ID, 1000, false);
+        updatePlayerData(PLAYER_3_ID, 1000, false);
+        updatePlayerData(PLAYER_4_ID, 1000, false);
         
         roulettePanel.setPreferredSize(new Dimension(1200, 600));
         roulettePanel.setBackground(Green);
@@ -114,7 +118,7 @@ public class Roulette extends JFrame {
         database = mongoClient.getDatabase("Roulette");
         players = database.getCollection("players");
     }
-    // hier unten schonmal die logik vorbereitet um die balance der players zu aktualisieren, fehlt noch die logik um die balance zu berechnen
+    //logik um spieler daten zu updaten
     private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
         Document player = players.find(new Document("_id", playerId)).first();
         if (player != null) {
@@ -544,12 +548,14 @@ public class Roulette extends JFrame {
     
     public static void main(String[] args) {
     	
+    	
   //  	GamePollingService service = new GamePollingService();
    // 	service.startReadyCheckPolling();
     	
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new Roulette();
+                
             }
         });
     }
