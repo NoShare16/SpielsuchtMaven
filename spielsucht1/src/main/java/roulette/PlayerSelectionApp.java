@@ -14,7 +14,6 @@ public class PlayerSelectionApp extends JFrame {
         new ObjectId("66560a6c6ab1d7f2d5fbc328"),
         new ObjectId("66560a6e6ab1d7f2d5fbc329")
     };
-    private int selectedPlayer;  // 0 means no player selected
 
     public PlayerSelectionApp() {
         setTitle("Select a Player");
@@ -32,20 +31,13 @@ public class PlayerSelectionApp extends JFrame {
         selectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setSelectedPlayer(playerComboBox.getSelectedIndex() + 1);
-                JOptionPane.showMessageDialog(null, "Player " + selectedPlayer + " selected. ID: " + PLAYER_IDS[selectedPlayer - 1].toHexString());
+                int selectedPlayerIndex = playerComboBox.getSelectedIndex();
+                Roulette.setSelectedPlayerId(PLAYER_IDS[selectedPlayerIndex]);
+                JOptionPane.showMessageDialog(null, "Player " + (selectedPlayerIndex + 1) + " selected. ID: " + PLAYER_IDS[selectedPlayerIndex].toHexString());
             }
         });
 
         setVisible(true);
-    }
-
-    private void setSelectedPlayer(int playerNumber) {
-        if (playerNumber < 1 || playerNumber > 4) {
-            JOptionPane.showMessageDialog(this, "Invalid player number: " + playerNumber);
-            return;
-        }
-        this.selectedPlayer = playerNumber;
     }
 
     public static void main(String[] args) {
@@ -56,4 +48,3 @@ public class PlayerSelectionApp extends JFrame {
         });
     }
 }
-

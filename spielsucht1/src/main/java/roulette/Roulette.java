@@ -28,6 +28,7 @@ import database.GamePollingService;
 
 
 public class Roulette extends JFrame {
+	
 	 private GamePollingService gamePollingService;
 
 	private MongoClient mongoClient;
@@ -40,7 +41,8 @@ public class Roulette extends JFrame {
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
-    private ObjectId selectedPlayer = PLAYER_2_ID;
+    private ObjectId selectedPlayer = PLAYER_1_ID;
+    private static ObjectId selectedPlayerId;
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -95,7 +97,7 @@ public class Roulette extends JFrame {
         updatePlayerData(PLAYER_4_ID, 1000, false);
         
         GamePollingService service = new GamePollingService();
-    	service.startReadyCheckPolling();
+    	startReadyCheckPolling();
         
         roulettePanel.setPreferredSize(new Dimension(1200, 600));
         roulettePanel.setBackground(Green);
@@ -111,6 +113,11 @@ public class Roulette extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+    public static void setSelectedPlayerId(ObjectId playerId) {
+        selectedPlayerId = playerId;
+        System.out.println("Selected Player ID updated to: " + playerId.toHexString());
     }
     
    
@@ -152,28 +159,51 @@ public class Roulette extends JFrame {
     public void startReadyCheckPolling() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         Runnable checkReadyStatusTask = () -> {
+        	
             System.out.println("Checking if all players are ready...");
             boolean allReady = checkAllPlayersReady();
+            
+            
             if (allReady) {
                 System.out.println("All players are ready. Starting game...");
                 // Potentially trigger an action to start the game
+                randomRoll();
             } else {
                 System.out.println("Not all players are ready.");
             }
+            
+            fetchResults();
+            
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
     }
     
     public int fetchResults() {
         MongoCollection<Document> results = database.getCollection("results");
-
-        // Fetches the document but does not delete it
         Document resultDocument = results.find(eq("_id", resultsId)).first();
 
         if (resultDocument != null) {
-            int result = resultDocument.getInteger("resultNumber", -1); // Using -1 as default if field not found
-            calculateBalance(result);
-            return result;
+            boolean readyFetch = resultDocument.getBoolean("readyForFetching", false); // default to false if not found
+            if (readyFetch) {
+                int result = resultDocument.getInteger("resultNumber", -1); // Default -1 if field not found
+                if (result != -1) {
+                    calculateBalance(result);
+                    spinRoulette(result);
+
+                    // Update the 'readyForFetching' flag to false after processing
+                    Document update = new Document("$set", new Document("readyForFetching", false));
+                    results.updateOne(eq("_id", resultsId), update);
+                    System.out.println("Updated 'readyForFetching' to false for result ID: " + resultsId.toHexString());
+
+                    return result;
+                } else {
+                    System.out.println("Result number is invalid for ID: " + resultsId.toHexString());
+                    return -1;
+                }
+            } else {
+                System.out.println("Result not ready for fetching for ID: " + resultsId.toHexString());
+                return -1;  // Returning -1 to indicate the result is not ready for fetching
+            }
         } else {
             System.out.println("No result found for ID: " + resultsId.toHexString());
             return -1;  // Returning -1 to indicate no result was found
@@ -383,7 +413,7 @@ public class Roulette extends JFrame {
                 balance = balance - bet;
                 updatePlayerData(selectedPlayer, balance, true);
                 System.out.println(balance);
-                randomRoll();
+               // randomRoll();
             }
         });
 
@@ -494,14 +524,14 @@ public class Roulette extends JFrame {
     }
     
     private void randomRoll() {
-    	if (checkAllPlayersReady()) {
+    	if (checkAllPlayersReady() && selectedPlayer == PLAYER_1_ID) {
 	        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
 	        boolean resultLogged = false;  // Flag to control result logging
 	        if (!resultLogged) {
 	            System.out.println("Random roll result: " + rouletteNumbers[position]);
 	           
 	            logGameResult(position);// Displaying the result for example
-	            spinRoulette(position);  // Optionally show or handle the result in some way
+	              
 	              // You could still log or process the result similarly
 	            
 	            resultLogged = true;  // Set flag to true after processing
@@ -521,7 +551,7 @@ public class Roulette extends JFrame {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
                     if (!resultLogged) {  // Only log result once
-                        fetchResults();
+                        
                     }
                     timer.stop();  // Ensure timer is stopped
                 }
@@ -540,7 +570,8 @@ public class Roulette extends JFrame {
         MongoCollection<Document> results = database.getCollection("results");
         Document filter = new Document("_id", resultsId);
         Document update = new Document("$set", new Document()
-            .append("resultNumber", resultNumber));
+            .append("resultNumber", resultNumber)
+        	.append("readyForFetching", true));
 
         results.updateOne(filter, update);
         System.out.println("Result updated: Number=" + resultNumber);
