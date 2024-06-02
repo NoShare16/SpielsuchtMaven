@@ -46,7 +46,8 @@ public class Roulette extends JFrame {
     private static final ObjectId PLAYER_2_ID = new ObjectId("66560a686ab1d7f2d5fbc327");
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
-    private ObjectId selectedPlayer;
+    private ObjectId selectedPlayer = PLAYER_2_ID;
+    private static ObjectId selectedPlayerId;
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -72,23 +73,19 @@ public class Roulette extends JFrame {
     private Border buttonBorder = new LineBorder(Color.WHITE, 1);
     private  Font font = new Font("Times New Roman", Font.BOLD, 20);
     private boolean readyState = false;
-    private double balance;
+    private double balance = 1000.00;
     private double bet;
     private JTextField EinsatzFeld = new JTextField();
-    private JLabel showPlayerInfo;
-    String[] playerOptions = {"Player 1", "Player 2", "Player 3", "Player 4"};
-    JComboBox playerComboBox = new JComboBox<>(playerOptions);
 
     public Roulette() {
+
+    	//this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
+    	
+        
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+        setLayout(new BorderLayout());
         initMongoDB();
-        setLayout(new FlowLayout());
-        add(playerComboBox);
-        JButton selectButton = new JButton("Select Player");
-        add(selectButton);
-
         roulettePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -97,61 +94,37 @@ public class Roulette extends JFrame {
                 drawBall(g);
             }
         };
-
+        
+        // initial alle auf false setzen
+      //  updatePlayerData(PLAYER_1_ID, 1000, false);
+       // updatePlayerData(PLAYER_2_ID, 1000, false);
+       // updatePlayerData(PLAYER_3_ID, 1000, false);
+        //updatePlayerData(PLAYER_4_ID, 1000, false);
+        settingAllfalse();
         
         GamePollingService service = new GamePollingService();
-        startReadyCheckPolling();
-
+    	startReadyCheckPolling();
+        
+        roulettePanel.setPreferredSize(new Dimension(1200, 600));
+        roulettePanel.setBackground(Green);
+        roulettePanel.setLayout(null); // Deaktiviere das Layout-Management
+        add(roulettePanel, BorderLayout.CENTER);
         JLabel EinsatzLabel = new JLabel("Please enter your bet!");
-        EinsatzLabel.setBounds(600, 462, 250, 25);
+        EinsatzLabel.setBounds(650, 462, 150, 25);
         EinsatzLabel.setForeground(Color.WHITE);
-        EinsatzLabel.setFont(font);
         roulettePanel.add(EinsatzLabel);
         EinsatzFeld.setBounds(800, 462, 100, 25);
         roulettePanel.add(EinsatzFeld);
-        showPlayerInfo = new JLabel("\n" + "Balance: " + Double.toString(balance));
-        showPlayerInfo.setBounds(10, 10, 200, 20);
-        showPlayerInfo.setForeground(Color.WHITE);
-        showPlayerInfo.setFont(font);
-        roulettePanel.add(showPlayerInfo);
-        drawButtons();
-
-        selectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                switch (playerComboBox.getSelectedIndex()) {
-                    case 0:
-                        selectedPlayer = PLAYER_1_ID;
-                        break;
-                    case 1:
-                        selectedPlayer = PLAYER_2_ID;
-                        break;
-                    case 2:
-                        selectedPlayer = PLAYER_3_ID;
-                        break;
-                    case 3:
-                        selectedPlayer = PLAYER_4_ID;
-                        break;
-                }
-                settingAllfalse();
-                getContentPane().removeAll();
-                setLayout(new BorderLayout());
-                add(roulettePanel, BorderLayout.CENTER);
-                roulettePanel.setBackground(Green);
-                roulettePanel.setLayout(null);
-                setSize(1200, 600);
-                validate();
-                repaint();
-                setLocationRelativeTo(null);
-            }
-        });
-
+        drawButtons(); // Füge die Buttons zur Roulette-Tafel hinzu
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
     }
     
-    
+    public static void setSelectedPlayerId(ObjectId playerId) {
+        selectedPlayerId = playerId;
+        System.out.println("Selected Player ID updated to: " + playerId.toHexString());
+    }
     
     public void settingAllfalse() {
     	if(selectedPlayer == PLAYER_1_ID) {
@@ -196,7 +169,7 @@ public class Roulette extends JFrame {
         return true; // All players are ready
     }
     
-    private boolean checkPlayerFetching() {
+  /*  private boolean checkPlayerFetching() {
     	ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
     	MongoCollection<Document> players = database.getCollection("players");
     	for (ObjectId playerId : playerIds) {
@@ -207,7 +180,7 @@ public class Roulette extends JFrame {
         }
         return true; // All players are ready
     }
-
+*/
     
     public void startReadyCheckPolling() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -325,7 +298,6 @@ public class Roulette extends JFrame {
         twotoone1.setBackground(Green);
         twotoone1.setForeground(Color.WHITE);
         twotoone1.setBorder(buttonBorder);
-        twotoone1.setFont(font);
         roulettePanel.add(twotoone1);
         twotoone1.setBounds(1100, 90, 70, 60);
         twotoone1.addActionListener(new ActionListener() {
@@ -338,7 +310,6 @@ public class Roulette extends JFrame {
         twotoone2.setBackground(Green);
         twotoone2.setForeground(Color.WHITE);
         twotoone2.setBorder(buttonBorder);
-        twotoone2.setFont(font);
         roulettePanel.add(twotoone2);
         twotoone2.setBounds(1100, 150, 70, 60);
         twotoone2.addActionListener(new ActionListener() {
@@ -351,7 +322,6 @@ public class Roulette extends JFrame {
         twotoone3.setBackground(Green);
         twotoone3.setForeground(Color.WHITE);
         twotoone3.setBorder(buttonBorder);
-        twotoone3.setFont(font);
         roulettePanel.add(twotoone3);
         twotoone3.setBounds(1100, 210, 70, 60);
         twotoone3.addActionListener(new ActionListener() {
@@ -364,7 +334,6 @@ public class Roulette extends JFrame {
         onest12.setBackground(Green);
         onest12.setForeground(Color.WHITE);
         onest12.setBorder(buttonBorder);
-        onest12.setFont(font);
         roulettePanel.add(onest12);
         onest12.setBounds(500, 270, 200, 60);
         onest12.addActionListener(new ActionListener() {
@@ -377,7 +346,6 @@ public class Roulette extends JFrame {
         twond12.setBackground(Green);
         twond12.setForeground(Color.WHITE);
         twond12.setBorder(buttonBorder);
-        twond12.setFont(font);
         roulettePanel.add(twond12);
         twond12.setBounds(700, 270, 200, 60);
         twond12.addActionListener(new ActionListener() {
@@ -390,7 +358,6 @@ public class Roulette extends JFrame {
         threerd12.setBackground(Green);
         threerd12.setForeground(Color.WHITE);
         threerd12.setBorder(buttonBorder);
-        threerd12.setFont(font);
         roulettePanel.add(threerd12);
         threerd12.setBounds(900, 270, 200, 60);
         threerd12.addActionListener(new ActionListener() {
@@ -403,7 +370,6 @@ public class Roulette extends JFrame {
         one18.setBackground(Green);
         one18.setForeground(Color.WHITE);
         one18.setBorder(buttonBorder);
-        one18.setFont(font);
         roulettePanel.add(one18);
         one18.setBounds(500, 330, 100, 60);
         one18.addActionListener(new ActionListener() {
@@ -416,7 +382,6 @@ public class Roulette extends JFrame {
         even.setBackground(Green);
         even.setForeground(Color.WHITE);
         even.setBorder(buttonBorder);
-        even.setFont(font);
         roulettePanel.add(even);
         even.setBounds(600, 330, 100, 60);
         even.addActionListener(new ActionListener() {
@@ -451,7 +416,6 @@ public class Roulette extends JFrame {
         odd.setBackground(Green);
         odd.setForeground(Color.WHITE);
         odd.setBorder(buttonBorder);
-        odd.setFont(font);
         roulettePanel.add(odd);
         odd.setBounds(900, 330, 100, 60);
         odd.addActionListener(new ActionListener() {
@@ -464,7 +428,6 @@ public class Roulette extends JFrame {
         nineteento36.setBackground(Green);
         nineteento36.setForeground(Color.WHITE);
         nineteento36.setBorder(buttonBorder);
-        nineteento36.setFont(font);
         roulettePanel.add(nineteento36);
         nineteento36.setBounds(1000, 330, 100, 60);
         nineteento36.addActionListener(new ActionListener() {
@@ -477,7 +440,6 @@ public class Roulette extends JFrame {
         readyButton.setBackground(DarkRed);
         readyButton.setForeground(Color.WHITE);
         readyButton.setBorder(buttonBorder);
-        readyButton.setFont(font);
         roulettePanel.add(readyButton);
         readyButton.setBounds(930, 450, 100, 50);
         readyButton.addActionListener(new ActionListener() {
