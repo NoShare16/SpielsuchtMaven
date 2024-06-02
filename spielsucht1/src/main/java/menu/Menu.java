@@ -1,4 +1,4 @@
-/*package menu;
+package menu;
 
 import javax.swing.*;
 import java.awt.*;
@@ -186,12 +186,13 @@ class BlackjackTable extends JFrame {
 
         // Disable buttons until a bet is placed
         enableGameButtons(false);
+        disableButtonsOnLoad(true);
     }
 
     private void placeBet() {
         try {
             int bet = Integer.parseInt(betField.getText());
-            if (bet > balance) {
+            if (bet > balance) {            	
                 JOptionPane.showMessageDialog(this, "Bet amount exceeds balance!");
             } else {
                 currentBet = bet;
@@ -259,6 +260,19 @@ class BlackjackTable extends JFrame {
         standHand2Button.setEnabled(enable);
         doubleDownHand2Button.setEnabled(enable);
     	} 
+    }
+    
+    public void disableButtonsOnLoad(boolean enable) {
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+        doubleDownButton.setEnabled(false);
+        splitButton.setEnabled(false);
+        hitHand1Button.setEnabled(false);
+        standHand1Button.setEnabled(false);
+        doubleDownHand1Button.setEnabled(false);
+        hitHand2Button.setEnabled(false);
+        standHand2Button.setEnabled(false);
+        doubleDownHand2Button.setEnabled(false);
     }
     
     public void disableButtonsForDoubleDown(boolean enable) {
@@ -788,4 +802,4 @@ class Card {
             default: throw new IllegalArgumentException("Unknown rank: " + rank);
         }
     }
-} */
+} 
