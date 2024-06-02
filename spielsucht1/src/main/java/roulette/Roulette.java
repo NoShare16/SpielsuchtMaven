@@ -99,8 +99,7 @@ public class Roulette extends JFrame {
         };
 
         
-        GamePollingService service = new GamePollingService();
-        startReadyCheckPolling();
+        
 
         JLabel EinsatzLabel = new JLabel("Please enter your bet!");
         EinsatzLabel.setBounds(600, 462, 250, 25);
@@ -143,6 +142,8 @@ public class Roulette extends JFrame {
                 validate();
                 repaint();
                 setLocationRelativeTo(null);
+                GamePollingService service = new GamePollingService();
+                startReadyCheckPolling();
             }
         });
 
@@ -165,11 +166,11 @@ public class Roulette extends JFrame {
   
     
     private void initMongoDB() {
-        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); // Use Config or env variables
+        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); 
         database = mongoClient.getDatabase("Roulette");
         players = database.getCollection("players");
     }
-    //logik um spieler daten zu updaten
+    
     private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
         Document player = players.find(new Document("_id", playerId)).first();
         if (player != null) {
@@ -190,10 +191,10 @@ public class Roulette extends JFrame {
         for (ObjectId playerId : playerIds) {
             Document player = players.find(eq("_id", playerId)).first();
             if (player == null || !player.getBoolean("readyState", false)) {
-                return false; // If any player is not ready, return false
+                return false; 
             }
         }
-        return true; // All players are ready
+        return true; 
     }
     
     private boolean checkPlayerFetching() {
@@ -202,10 +203,10 @@ public class Roulette extends JFrame {
     	for (ObjectId playerId : playerIds) {
             Document player = players.find(eq("_id", playerId)).first();
             if (player == null || !player.getBoolean("readyForFetching", false)) {
-                return false; // If any player is not ready, return false
+                return false; 
             }
         }
-        return true; // All players are ready
+        return true; 
     }
 
     
@@ -219,7 +220,6 @@ public class Roulette extends JFrame {
             
             if (allReady) {
                 System.out.println("All players are ready. Starting game...");
-                // Potentially trigger an action to start the game
                 randomRoll();
                 
             } else {
@@ -229,7 +229,7 @@ public class Roulette extends JFrame {
             fetchResults();
             
         };
-        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 3, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
     }
     
     public int fetchResults() {
@@ -256,15 +256,15 @@ public class Roulette extends JFrame {
                     return result;
                 } else {
                     System.out.println("Result number is invalid for ID: " + resultsId.toHexString());
-                    return -1; // Return -1 to indicate an invalid result number
+                    return -1; 
                 }
             } else {
                 System.out.println("No result found for ID: " + resultsId.toHexString());
-                return -1; // Returning -1 to indicate no result was found
+                return -1; 
             }
         } else {
             System.out.println("Selected player not ready for fetching or does not exist, Player ID: " + selectedPlayer.toHexString());
-            return -1; // Return -1 to indicate the selected player is not ready
+            return -1; 
         }
     }
 
@@ -300,7 +300,7 @@ public class Roulette extends JFrame {
             } else {
                 rouletteButtons[i].setBackground(Color.BLACK);
                 rouletteButtons[i].setForeground(Color.WHITE);
-                rouletteButtons[i].setFont(font);// Weiße Schrift für schwarze Buttons
+                rouletteButtons[i].setFont(font);// 
             }
             rouletteButtons[i].setBorder(buttonBorder);
             roulettePanel.add(rouletteButtons[i]);
@@ -487,7 +487,7 @@ public class Roulette extends JFrame {
                 balance = balance - bet;
                 updatePlayerData(selectedPlayer, balance, true);
                 System.out.println(balance);
-               // randomRoll();
+               
             }
         });
 
@@ -547,10 +547,6 @@ public class Roulette extends JFrame {
         int centerX = roulettePanel.getWidth() / 6;
         int centerY = roulettePanel.getHeight() / 2;
 
-//        g.setColor(Color.ORANGE);
-//        g.fillOval(centerX - radius, centerY - radius, radius , radius );
-//        g.setColor(Color.BLACK);
-//        g.fillOval(centerX + radius/2000, centerY + radius/2000, radius, radius);
 
         for (int i = 0; i < rouletteNumbers.length; i++) {
             double angleRadians = Math.toRadians(i * (360.0 / rouletteNumbers.length));
@@ -599,16 +595,16 @@ public class Roulette extends JFrame {
     
     private void randomRoll() {
     	if (selectedPlayer == PLAYER_1_ID) {
-	        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
-	        boolean resultLogged = false;  // Flag to control result logging
+	        final int position = (int) (Math.random() * rouletteNumbers.length);  
+	        boolean resultLogged = false; 
 	        if (!resultLogged) {
 	            System.out.println("Random roll result: " + rouletteNumbers[position]);
 	           
-	            logGameResult(position);// Displaying the result for example
+	            logGameResult(position);
 	              
-	              // You could still log or process the result similarly
+	              
 	            
-	            resultLogged = true;  // Set flag to true after processing
+	            resultLogged = true; 
 	        }
     	} else {
     		System.out.println("Not all players are ready.");
@@ -620,14 +616,14 @@ public class Roulette extends JFrame {
     private void spinRoulette(int position) {
         angle = 0;
         timer = new Timer(15, new ActionListener() {
-            private boolean resultLogged = false;  // Flag to control result logging
+            private boolean resultLogged = false;  
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
-                    if (!resultLogged) {  // Only log result once
+                    if (!resultLogged) {  
                         
                     }
-                    timer.stop();  // Ensure timer is stopped
+                    timer.stop(); 
                 }
                 roulettePanel.repaint();
             }
@@ -643,15 +639,15 @@ public class Roulette extends JFrame {
         MongoCollection<Document> results = database.getCollection("results");
         MongoCollection<Document> players = database.getCollection("players");
 
-        // Update the results document
+        
         Document resultsFilter = new Document("_id", resultsId);
         Document resultsUpdate = new Document("$set", new Document("resultNumber", resultNumber));
         results.updateOne(resultsFilter, resultsUpdate);
         System.out.println("Result updated: Number=" + resultNumber);
 
-        // Set 'readyForFetching' to true for every player
+        
         Document playersUpdate = new Document("$set", new Document("readyForFetching", true));
-        players.updateMany(new Document(), playersUpdate); // This will update all documents in the players collection
+        players.updateMany(new Document(), playersUpdate); 
         System.out.println("All players set to 'readyForFetching' = true.");
     }
 
