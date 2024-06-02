@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import roulette.Roulette;
-
 public class Menu extends JFrame {
 
     public Menu() {
@@ -66,8 +64,7 @@ public class Menu extends JFrame {
         rouletteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	Roulette roulette = new Roulette();
-                roulette.setVisible(true);
+                JOptionPane.showMessageDialog(null, "Roulette Button Clicked!");
             }
         });
 
@@ -122,7 +119,7 @@ class BlackjackTable extends JFrame {
     // Betting related components
     private JTextField betField;
     private JLabel balanceLabel;
-    private int balance = 10000; // Initial balance
+    private int balance = 1000; // Initial balance
     private int currentBet = 0;
 
     public BlackjackTable() {
@@ -192,7 +189,7 @@ class BlackjackTable extends JFrame {
     private void placeBet() {
         try {
             int bet = Integer.parseInt(betField.getText());
-            if (bet > balance) {            	
+            if (bet > balance) {
                 JOptionPane.showMessageDialog(this, "Bet amount exceeds balance!");
             } else {
                 currentBet = bet;
@@ -219,12 +216,12 @@ class BlackjackTable extends JFrame {
          } catch (NumberFormatException e) {
              JOptionPane.showMessageDialog(this, "Invalid bet amount!");
          }
-         checkInitialBlackjack();
+         checkInitialBlackjack(); // Überprüfen Sie sofort nach dem Austeilen der Karten
          if (getHandValue(dealerHand)==21) {
-             hitButton.setEnabled(false);
-             standButton.setEnabled(false);
-             doubleDownButton.setEnabled(false);
-             splitButton.setEnabled(false);
+        	 hitButton.setEnabled(false);
+        	 standButton.setEnabled(false);
+        	 doubleDownButton.setEnabled(false);
+        	 splitButton.setEnabled(false);
          }
      }
      
@@ -354,7 +351,6 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
-                    updateBalanceLabel();
                     enableGameButtons(false);
                     tablePanel.repaint();
                 }
@@ -386,6 +382,7 @@ class BlackjackTable extends JFrame {
                     dealerTurn();
                     disableButtonsForDoubleDown(false);  	
                     checkWinCondition();
+                    updateBalanceLabel();
                    
                     tablePanel.repaint();
                 }
@@ -467,6 +464,9 @@ class BlackjackTable extends JFrame {
                     dealerTurn();
                     checkWinCondition(true); // Check only for Hand 2
                     updateBalanceLabel();
+                    hitHand2Button.setEnabled(false);
+                    standHand2Button.setEnabled(false);
+                    doubleDownHand2Button.setEnabled(false);
                     tablePanel.repaint();
                 }
             });
@@ -483,6 +483,7 @@ class BlackjackTable extends JFrame {
                     dealerTurn();
                     enableButtonsDoubleDownHand1(false);
                     checkWinCondition(false); // Check only for Hand 1
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
@@ -498,6 +499,7 @@ class BlackjackTable extends JFrame {
                     enableButtonsDoubleDownHand2(false);
                     checkSplitHand();
                     checkWinCondition();
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
@@ -814,4 +816,4 @@ class Card {
             default: throw new IllegalArgumentException("Unknown rank: " + rank);
         }
     }
-} 
+}
