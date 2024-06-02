@@ -1,6 +1,9 @@
 package menu;
 
 import javax.swing.*;
+
+import roulette.Roulette;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,7 +67,8 @@ public class Menu extends JFrame {
         rouletteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Roulette Button Clicked!");
+            	Roulette roulette = new Roulette();
+                roulette.setVisible(true);
             }
         });
 
