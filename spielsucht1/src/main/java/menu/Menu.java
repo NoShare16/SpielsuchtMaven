@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Menu extends JFrame {
+	
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     public Menu() {
         setTitle("Casino");
-        setSize(1920, 1080);
+        setSize(screenSize.width, screenSize.height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -128,7 +130,7 @@ class BlackjackTable extends JFrame {
 
     public BlackjackTable() {
         setTitle("Blackjack Table");
-        setSize(1640, 924);
+        setSize(1920, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -200,18 +202,18 @@ class BlackjackTable extends JFrame {
                 balance -= bet;
                 updateBalanceLabel();
                 resetGame();
-                resetButtons(); // Zurücksetzen der Buttons nach Platzieren eines neuen Einsatzes
+                resetButtons(); 
 
-                // Entferne alle Buttons aus dem buttonPanel
+                
                 buttonPanel.removeAll();
 
-                // Füge die relevanten Buttons hinzu (diese können sich je nach Spielstatus ändern)
+                
                 buttonPanel.add(hitButton);
                 buttonPanel.add(standButton);
                 buttonPanel.add(doubleDownButton);
                 buttonPanel.add(splitButton);
 
-                // Revalidate und repaint das buttonPanel
+                // Revalidate and repaint buttonPanel
                 buttonPanel.revalidate();
                 buttonPanel.repaint();
 
@@ -220,7 +222,7 @@ class BlackjackTable extends JFrame {
          } catch (NumberFormatException e) {
              JOptionPane.showMessageDialog(this, "Invalid bet amount!");
          }
-         checkInitialBlackjack(); // Überprüfen Sie sofort nach dem Austeilen der Karten
+         checkInitialBlackjack();
          if (getHandValue(dealerHand)==21) {
         	 hitButton.setEnabled(false);
         	 standButton.setEnabled(false);
@@ -235,7 +237,7 @@ class BlackjackTable extends JFrame {
         doubleDownButton.setEnabled(true);
         splitButton.setEnabled(true);
 
-        // Deaktiviere die Schaltflächen für Hand 1 und Hand 2
+        // Deactivate buttons for hand 1 and hand 2
         hitHand1Button.setEnabled(false);
         standHand1Button.setEnabled(false);
         doubleDownHand1Button.setEnabled(false);
@@ -243,7 +245,7 @@ class BlackjackTable extends JFrame {
         standHand2Button.setEnabled(false);
         doubleDownHand2Button.setEnabled(false);
 
-        // Entferne spezielle Hand-Buttons und füge die Standard-Buttons hinzu
+        // Delete special hand-buttons and add standard buttons 
         buttonPanel.removeAll();
         buttonPanel.add(hitButton);
         buttonPanel.add(standButton);
