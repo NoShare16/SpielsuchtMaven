@@ -61,7 +61,7 @@ public class GamePollingService {
     public static void main(String[] args) {
         GamePollingService service = new GamePollingService();
         service.startPolling();
-    }*/
+    }
     
     public boolean checkAllPlayersReady() {
         ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
@@ -89,5 +89,5 @@ public class GamePollingService {
             }
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
-    }
+    }*/
 }

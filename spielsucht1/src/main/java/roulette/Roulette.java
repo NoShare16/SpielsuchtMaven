@@ -74,7 +74,7 @@ public class Roulette extends JFrame {
 
     public Roulette() {
 
-    	this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
+    	//this.gamePollingService = new GamePollingService(); // Initialize here or in an initialization block
     	
         
         setTitle("Animated Roulette");
@@ -91,10 +91,11 @@ public class Roulette extends JFrame {
         };
         
         // initial alle auf false setzen
-        updatePlayerData(PLAYER_1_ID, 1000, false);
-        updatePlayerData(PLAYER_2_ID, 1000, false);
-        updatePlayerData(PLAYER_3_ID, 1000, false);
-        updatePlayerData(PLAYER_4_ID, 1000, false);
+      //  updatePlayerData(PLAYER_1_ID, 1000, false);
+       // updatePlayerData(PLAYER_2_ID, 1000, false);
+       // updatePlayerData(PLAYER_3_ID, 1000, false);
+        //updatePlayerData(PLAYER_4_ID, 1000, false);
+        settingAllfalse();
         
         GamePollingService service = new GamePollingService();
     	startReadyCheckPolling();
@@ -120,6 +121,14 @@ public class Roulette extends JFrame {
         System.out.println("Selected Player ID updated to: " + playerId.toHexString());
     }
     
+    public void settingAllfalse() {
+    	if(selectedPlayer == PLAYER_1_ID) {
+    		updatePlayerData(PLAYER_1_ID, 1000, false);
+            updatePlayerData(PLAYER_2_ID, 1000, false);
+            updatePlayerData(PLAYER_3_ID, 1000, false);
+            updatePlayerData(PLAYER_4_ID, 1000, false);
+    	}
+    }
    
   
     
