@@ -80,13 +80,6 @@ public class Roulette extends JFrame {
     JComboBox playerComboBox = new JComboBox<>(playerOptions);
 
     public Roulette() {
-<<<<<<< HEAD
-=======
-
-    	//this.gamePollingService = new GamePollingService(); // Initialisierung
-    	
-        
->>>>>>> branch 'main' of https://github.com/NoShare16/SpielsuchtMaven.git
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -104,13 +97,7 @@ public class Roulette extends JFrame {
                 drawBall(g);
             }
         };
-<<<<<<< HEAD
 
-=======
-        
-        // initial alle auf false setzen
-        settingAllfalse();
->>>>>>> branch 'main' of https://github.com/NoShare16/SpielsuchtMaven.git
         
         GamePollingService service = new GamePollingService();
         startReadyCheckPolling();
@@ -178,11 +165,10 @@ public class Roulette extends JFrame {
   
     
     private void initMongoDB() {
-        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); 
+        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); // Use Config or env variables
         database = mongoClient.getDatabase("Roulette");
         players = database.getCollection("players");
     }
-    
     //logik um spieler daten zu updaten
     private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
         Document player = players.find(new Document("_id", playerId)).first();
@@ -204,13 +190,13 @@ public class Roulette extends JFrame {
         for (ObjectId playerId : playerIds) {
             Document player = players.find(eq("_id", playerId)).first();
             if (player == null || !player.getBoolean("readyState", false)) {
-                return false; // false wenn nicht alle ready sind
+                return false; // If any player is not ready, return false
             }
         }
         return true; // All players are ready
     }
     
-   /* private boolean checkPlayerFetching() {
+    private boolean checkPlayerFetching() {
     	ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
     	MongoCollection<Document> players = database.getCollection("players");
     	for (ObjectId playerId : playerIds) {
@@ -221,7 +207,7 @@ public class Roulette extends JFrame {
         }
         return true; // All players are ready
     }
-*/
+
     
     public void startReadyCheckPolling() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -233,7 +219,7 @@ public class Roulette extends JFrame {
             
             if (allReady) {
                 System.out.println("All players are ready. Starting game...");
-                // start des spiels triggern
+                // Potentially trigger an action to start the game
                 randomRoll();
                 
             } else {
@@ -250,19 +236,19 @@ public class Roulette extends JFrame {
         MongoCollection<Document> players = database.getCollection("players");
         MongoCollection<Document> results = database.getCollection("results");
 
-        // Check ob alle ready sind fürs fetching
+        // Check if the selected player is ready for fetching
         Document selectedPlayerDoc = players.find(eq("_id", selectedPlayer)).first();
         if (selectedPlayerDoc != null && selectedPlayerDoc.getBoolean("readyForFetching", false)) {
             // Fetch the result document
             Document resultDocument = results.find(eq("_id", resultsId)).first();
             if (resultDocument != null) {
-               int result = resultDocument.getInteger("resultNumber", -1);
+                int result = resultDocument.getInteger("resultNumber", -1);
                 if (result != -1) {
                     // Process the result
                     calculateBalance(result);
                     spinRoulette(result);
 
-                    // Update readyForFetching to false
+                    // Update the 'readyForFetching' flag for the selected player to false
                     Document update = new Document("$set", new Document("readyForFetching", false));
                     players.updateOne(eq("_id", selectedPlayer), update);
                     System.out.println("Player " + selectedPlayer.toHexString() + " 'readyForFetching' set to false.");
@@ -270,15 +256,15 @@ public class Roulette extends JFrame {
                     return result;
                 } else {
                     System.out.println("Result number is invalid for ID: " + resultsId.toHexString());
-                    return -1; // Return -1 wenn nicht gültig ist
+                    return -1; // Return -1 to indicate an invalid result number
                 }
             } else {
                 System.out.println("No result found for ID: " + resultsId.toHexString());
-                return -1; // Returning -1 wenn nicht gefunden wurde
+                return -1; // Returning -1 to indicate no result was found
             }
         } else {
             System.out.println("Selected player not ready for fetching or does not exist, Player ID: " + selectedPlayer.toHexString());
-            return -1; // Return -1 wenn player nicht ready sind
+            return -1; // Return -1 to indicate the selected player is not ready
         }
     }
 
@@ -501,7 +487,7 @@ public class Roulette extends JFrame {
                 balance = balance - bet;
                 updatePlayerData(selectedPlayer, balance, true);
                 System.out.println(balance);
-               
+               // randomRoll();
             }
         });
 
@@ -614,15 +600,15 @@ public class Roulette extends JFrame {
     private void randomRoll() {
     	if (selectedPlayer == PLAYER_1_ID) {
 	        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
-	        boolean resultLogged = false;  //  control result logging
+	        boolean resultLogged = false;  // Flag to control result logging
 	        if (!resultLogged) {
 	            System.out.println("Random roll result: " + rouletteNumbers[position]);
 	           
-	            logGameResult(position);// log result
+	            logGameResult(position);// Displaying the result for example
 	              
-	              
+	              // You could still log or process the result similarly
 	            
-	            resultLogged = true;  // Set true nach prozess
+	            resultLogged = true;  // Set flag to true after processing
 	        }
     	} else {
     		System.out.println("Not all players are ready.");
@@ -634,14 +620,14 @@ public class Roulette extends JFrame {
     private void spinRoulette(int position) {
         angle = 0;
         timer = new Timer(15, new ActionListener() {
-            private boolean resultLogged = false;  //  control result logging
+            private boolean resultLogged = false;  // Flag to control result logging
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
                     if (!resultLogged) {  // Only log result once
                         
                     }
-                    timer.stop();  
+                    timer.stop();  // Ensure timer is stopped
                 }
                 roulettePanel.repaint();
             }
@@ -663,9 +649,9 @@ public class Roulette extends JFrame {
         results.updateOne(resultsFilter, resultsUpdate);
         System.out.println("Result updated: Number=" + resultNumber);
 
-        // Set readyForFetching true für jeden player
+        // Set 'readyForFetching' to true for every player
         Document playersUpdate = new Document("$set", new Document("readyForFetching", true));
-        players.updateMany(new Document(), playersUpdate); // updatet alle documente in der players collection
+        players.updateMany(new Document(), playersUpdate); // This will update all documents in the players collection
         System.out.println("All players set to 'readyForFetching' = true.");
     }
 
