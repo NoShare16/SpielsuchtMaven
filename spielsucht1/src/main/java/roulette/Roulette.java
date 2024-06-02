@@ -208,6 +208,23 @@ public class Roulette extends JFrame {
         }
         return true; 
     }
+    
+    public void updateBalance() {
+    	MongoCollection<Document> players = database.getCollection("players");
+        Document playerDocument = players.find(eq("_id", selectedPlayer)).first();
+        
+        if (playerDocument != null) {
+            Double fetchedBalance = playerDocument.getDouble("balance");
+            if (fetchedBalance != null) {
+                balance = fetchedBalance; // Update the class variable
+                System.out.println("Updated balance for selected player: " + balance);
+            } else {
+                System.out.println("Balance not set for player ID: " + selectedPlayer.toHexString());
+            }
+        } else {
+            System.out.println("No player found with ID: " + selectedPlayer.toHexString());
+        }
+    }
 
     
     public void startReadyCheckPolling() {
@@ -227,9 +244,10 @@ public class Roulette extends JFrame {
             }
             
             fetchResults();
+            updateBalance();
             
         };
-        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 3, TimeUnit.SECONDS);
     }
     
     public int fetchResults() {
