@@ -125,7 +125,7 @@ class BlackjackTable extends JFrame {
     // Betting related components
     private JTextField betField;
     private JLabel balanceLabel;
-    private int balance = 1000; // Initial balance
+    private int balance = 100000; // Initial balance
     private int currentBet = 0;
 
     public BlackjackTable() {
