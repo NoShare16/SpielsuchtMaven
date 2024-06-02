@@ -30,7 +30,7 @@ class BlackjackTable extends JFrame {
     }
     private final List<Card> dealerHand;
     public List<Card> getDealerHand() {
-    	return playerHand;
+    	return dealerHand;
     }
     private final TablePanel tablePanel;
     private boolean doubledDown = false; // Track if double down was used
@@ -67,7 +67,7 @@ class BlackjackTable extends JFrame {
     // Betting related components
     private JTextField betField;
     private JLabel balanceLabel;
-    private int balance = 1000; // Initial balance
+    private int balance = 10000; // Initial balance
     private int currentBet = 0;
 
     public BlackjackTable() {
@@ -236,6 +236,13 @@ class BlackjackTable extends JFrame {
         doubleDownHand2Button.setEnabled(enable);
     	}
     } 
+    
+    public void disableHand2Buttons(boolean enable) {
+        hitHand2Button.setEnabled(enable);
+        standHand2Button.setEnabled(enable);
+        doubleDownHand2Button.setEnabled(enable);
+  }
+    
 
     private void updateBalanceLabel() {
         balanceLabel.setText("Balance: $" + balance);
@@ -401,7 +408,10 @@ class BlackjackTable extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     dealerTurn();
-                    checkWinCondition(true); // Check only for Hand 2
+                    checkWinCondition(false); // Check only for Hand 2
+                    hitHand2Button.setEnabled(false);
+                    standHand2Button.setEnabled(false);
+                    doubleDownHand2Button.setEnabled(false);
                     tablePanel.repaint();
                 }
             });
@@ -439,29 +449,29 @@ class BlackjackTable extends JFrame {
         }
         
         
-private void checkWinCondition(boolean isHand2) {
-    int playerValue = isHand2 ? getHandValue(splitHand) : getHandValue(playerHand);
-    int dealerValue = getHandValue(dealerHand);
+        private void checkWinCondition(boolean isHand2) {
+            int playerValue = isHand2 ? getHandValue(splitHand) : getHandValue(playerHand);
+            int dealerValue = getHandValue(dealerHand);
 
-    StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder();
 
-    if (playerValue > 21) {
-    	
-        result.append(isHand2 ? "Player's Hand 2 busts. " : "Player's Hand 1 busts. ");
-        result.append("Dealer wins.");
-    } else if (dealerValue > 21 || playerValue > dealerValue) {
-        result.append(isHand2 ? "Player's Hand 2 wins!" : "Player's Hand 1 wins!");
-        balance += currentBet * 2;
-    } else if (playerValue == dealerValue) {
-        result.append("Push. It's a tie.");
-        balance += currentBet;
-    } else {
-        result.append("Dealer wins.");
-    }
-    updateBalanceLabel();
-    JOptionPane.showMessageDialog(this, result.toString());
-    enableGameButtons(false);
-}
+            if (playerValue > 21) {
+
+                result.append(isHand2 ? "Player's Hand 2 busts. " : "Player's Hand 1 busts. ");
+                result.append("Dealer wins.");
+            } else if (dealerValue > 21 || playerValue > dealerValue) {
+                result.append(isHand2 ? "Player's Hand 2 wins!" : "Player's Hand 1 wins!");
+                balance += currentBet * 2;
+            } else if (playerValue == dealerValue) {
+                result.append("Push. It's a tie.");
+                balance += currentBet;
+            } else {
+                result.append("Dealer wins.");
+            }
+            updateBalanceLabel();
+            JOptionPane.showMessageDialog(this, result.toString());
+            disableHand2Buttons(false);
+        }
     
 private void checkPlayerHand() {
     int handValue = getHandValue(playerHand);
@@ -507,6 +517,8 @@ private void checkPlayerHand() {
         standHand2Button.setEnabled(enable);
         doubleDownHand2Button.setEnabled(enable);
     }
+    
+    
     private void checkSplitHand() {
         int handValue = getHandValue(splitHand);
 
@@ -516,9 +528,12 @@ private void checkPlayerHand() {
         } else if (handValue > 21) {
             JOptionPane.showMessageDialog(this, "Player's Hand 2 busts!");
             disablePlayerButtons(false); // Disable buttons for Hand 2
+        } else if (handValue < 21) {
+        	disablePlayerButtons(false);
         }
     }
-
+    
+    
     private void dealerTurn() {
         while (getHandValue(dealerHand) < 17) {
             dealerHand.add(deck.dealCard());
@@ -599,6 +614,19 @@ private void checkPlayerHand() {
         }
     }
 
+    private void disablePlayer2Buttons(boolean isHand2) {
+        if (isHand2) {
+            hitHand2Button.setEnabled(false);
+            standHand2Button.setEnabled(false);
+            doubleDownHand2Button.setEnabled(false);
+        } else {
+            hitHand1Button.setEnabled(false);
+            standHand1Button.setEnabled(false);
+            doubleDownHand1Button.setEnabled(false);
+        }
+    }
+    
+    
     public Map<String, BufferedImage> loadCardImages() {
         Map<String, BufferedImage> cardImages = new HashMap<>();
         String[] suits = {"clubs", "diamonds", "hearts", "spades"};
