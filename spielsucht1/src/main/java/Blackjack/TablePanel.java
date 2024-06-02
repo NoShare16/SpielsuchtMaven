@@ -1,23 +1,16 @@
 package Blackjack;
 
-import javax.swing.*;
 
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import Blackjack.BlackjackTable;
-import Blackjack.Card;
+import javax.swing.JPanel;
 
 
 
@@ -47,7 +40,7 @@ class TablePanel extends JPanel {
 
         int cardWidth = 240;
         int cardHeight = 360;
-        int overlap = 120; // Wert fÃ¼r die Ãœberlappung
+        int overlap = 120; 
         int arcWidth = 30;
 		int arcHeight = 30;
 

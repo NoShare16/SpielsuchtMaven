@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,35 +19,33 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import Blackjack.Card;
-import Blackjack.Deck;
-
-
-
-
 
 
 class BlackjackTable extends JFrame {
     private final Deck deck;
     private final List<Card> playerHand;
-    public List <Card> getPlayerHand() {
+    public List<Card> getPlayerHand() {
     	return playerHand;
     }
     private final List<Card> dealerHand;
-    public List <Card> getDealerHand() {
-    	return dealerHand;
+    public List<Card> getDealerHand() {
+    	return playerHand;
     }
     private final TablePanel tablePanel;
     private boolean doubledDown = false; // Track if double down was used
 
     private final List<Card> splitHand;
-    public List <Card> getSplitHand() {
+    public List<Card> getSplitHand() {
     	return splitHand;
     }
-    public boolean isSplit() {
-        return isSplit();
-    }
    
+  
+    	public boolean isSplit() {
+    		return isSplit();
+    	}
+    
+    
+    
 
     // Map to store card images
     private final Map<String, BufferedImage> cardImages;
@@ -133,12 +130,13 @@ class BlackjackTable extends JFrame {
 
         // Disable buttons until a bet is placed
         enableGameButtons(false);
+        disableButtonsOnLoad(true);
     }
 
     private void placeBet() {
         try {
             int bet = Integer.parseInt(betField.getText());
-            if (bet > balance) {
+            if (bet > balance) {            	
                 JOptionPane.showMessageDialog(this, "Bet amount exceeds balance!");
             } else {
                 currentBet = bet;
@@ -208,6 +206,19 @@ class BlackjackTable extends JFrame {
     	} 
     }
     
+    public void disableButtonsOnLoad(boolean enable) {
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+        doubleDownButton.setEnabled(false);
+        splitButton.setEnabled(false);
+        hitHand1Button.setEnabled(false);
+        standHand1Button.setEnabled(false);
+        doubleDownHand1Button.setEnabled(false);
+        hitHand2Button.setEnabled(false);
+        standHand2Button.setEnabled(false);
+        doubleDownHand2Button.setEnabled(false);
+    }
+    
     public void disableButtonsForDoubleDown(boolean enable) {
     	if (getHandValue(playerHand) < 21) {
         hitButton.setEnabled(enable);
@@ -241,7 +252,6 @@ class BlackjackTable extends JFrame {
             JOptionPane.showMessageDialog(this, "Dealer has Blackjack. You lose.");
             enableGameButtons(false);            
         }
-        
     }
 
     private void resetGame() {
@@ -322,7 +332,8 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     boolean canSplit = playerHand.size() == 2 && playerHand.get(0).getValue() == playerHand.get(1).getValue();
 
-                    if (canSplit) {                       
+                    if (canSplit) {
+                        splitHand.add(playerHand.remove(1));
                         boolean isSplit = true;
 
                         balance -= currentBet;
@@ -585,7 +596,7 @@ private void checkPlayerHand() {
         }
     }
 
-    public Map<String, BufferedImage> loadCardImages() {
+    Map<String, BufferedImage> loadCardImages() {
         Map<String, BufferedImage> cardImages = new HashMap<>();
         String[] suits = {"clubs", "diamonds", "hearts", "spades"};
         String[] ranks = {"two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king", "ace"};
@@ -604,22 +615,4 @@ private void checkPlayerHand() {
 
         return cardImages;
     }
-    
-    
-
-private int calculateHandSum(List<Card> hand) {
-    int sum = 0;
-    int aceCount = 0;
-    for (Card card : hand) {
-        sum += card.getValue();
-        if (card.getRank() == Card.Rank.ACE) {
-            aceCount++;
-        }
-    }
-    while (sum > 21 && aceCount > 0) {
-        sum -= 10;
-        aceCount--;
-    }
-    return sum;
-}
 }
