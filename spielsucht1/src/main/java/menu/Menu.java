@@ -33,8 +33,8 @@ public class Menu extends JFrame {
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Load images
-        ImageIcon rouletteIcon = new ImageIcon("Bilder/games/Roulette.png");
-        ImageIcon blackjackIcon = new ImageIcon("Bilder/games/Blackjack Table.G03.watermarked.2k.png");
+        ImageIcon rouletteIcon = new ImageIcon("games/Roulette.png");
+        ImageIcon blackjackIcon = new ImageIcon("games/Blackjack Table.G03.watermarked.2k.png");
 
         // Create buttons
         JButton rouletteButton = new JButton("Roulette", rouletteIcon);
@@ -647,7 +647,7 @@ private void checkPlayerHand() {
             for (String rank : ranks) {
                 String cardName = rank + "_of_" + suit;
                 try {
-                    BufferedImage image = ImageIO.read(new File("Bilder/cards/" + cardName + ".png"));
+                    BufferedImage image = ImageIO.read(new File("cards/" + cardName + ".png"));
                     cardImages.put(cardName, image);
                 } catch (IOException e) {
                     e.printStackTrace();
