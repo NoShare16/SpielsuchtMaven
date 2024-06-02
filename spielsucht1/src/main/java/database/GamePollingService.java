@@ -33,7 +33,7 @@ public class GamePollingService {
         this.database = client.getDatabase("Roulette");
     }
     
-  /*  public List<Player> getCurrentPlayerBalances() {
+    public List<Player> getCurrentPlayerBalances() {
         MongoCollection<Document> players = database.getCollection("players");
         List<Player> playerList = new ArrayList<>();
 
@@ -89,5 +89,5 @@ public class GamePollingService {
             }
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 10, TimeUnit.SECONDS);
-    }*/
+    }
 }

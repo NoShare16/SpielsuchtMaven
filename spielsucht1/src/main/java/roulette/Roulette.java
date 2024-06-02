@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 
 import database.GamePollingService;
 import database.GameSession;
+
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -14,12 +16,15 @@ import config.Config;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
+
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -163,6 +168,18 @@ public class Roulette extends JFrame {
         }
         return true; // All players are ready
     }
+    
+    private boolean checkPlayerFetching() {
+    	ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
+    	MongoCollection<Document> players = database.getCollection("players");
+    	for (ObjectId playerId : playerIds) {
+            Document player = players.find(eq("_id", playerId)).first();
+            if (player == null || !player.getBoolean("readyForFetching", false)) {
+                return false; // If any player is not ready, return false
+            }
+        }
+        return true; // All players are ready
+    }
 
     
     public void startReadyCheckPolling() {
@@ -170,13 +187,14 @@ public class Roulette extends JFrame {
         Runnable checkReadyStatusTask = () -> {
         	
             System.out.println("Checking if all players are ready...");
-            boolean allReady = checkAllPlayersReady();
+            boolean allReady = checkAllPlayersReady();            
             
             
             if (allReady) {
                 System.out.println("All players are ready. Starting game...");
                 // Potentially trigger an action to start the game
                 randomRoll();
+                updatePlayerData(selectedPlayer,balance, false);
             } else {
                 System.out.println("Not all players are ready.");
             }
@@ -188,36 +206,45 @@ public class Roulette extends JFrame {
     }
     
     public int fetchResults() {
+        MongoCollection<Document> players = database.getCollection("players");
         MongoCollection<Document> results = database.getCollection("results");
-        Document resultDocument = results.find(eq("_id", resultsId)).first();
 
-        if (resultDocument != null) {
-            boolean readyFetch = resultDocument.getBoolean("readyForFetching", false); // default to false if not found
-            if (readyFetch) {
-                int result = resultDocument.getInteger("resultNumber", -1); // Default -1 if field not found
+        // Check if the selected player is ready for fetching
+        Document selectedPlayerDoc = players.find(eq("_id", selectedPlayer)).first();
+        if (selectedPlayerDoc != null && selectedPlayerDoc.getBoolean("readyForFetching", false)) {
+            // Fetch the result document
+            Document resultDocument = results.find(eq("_id", resultsId)).first();
+            if (resultDocument != null) {
+                int result = resultDocument.getInteger("resultNumber", -1);
                 if (result != -1) {
+                    // Process the result
                     calculateBalance(result);
                     spinRoulette(result);
 
-                    // Update the 'readyForFetching' flag to false after processing
+                    // Update the 'readyForFetching' flag for the selected player to false
                     Document update = new Document("$set", new Document("readyForFetching", false));
-                    results.updateOne(eq("_id", resultsId), update);
-                    System.out.println("Updated 'readyForFetching' to false for result ID: " + resultsId.toHexString());
+                    players.updateOne(eq("_id", selectedPlayer), update);
+                    System.out.println("Player " + selectedPlayer.toHexString() + " 'readyForFetching' set to false.");
 
                     return result;
                 } else {
                     System.out.println("Result number is invalid for ID: " + resultsId.toHexString());
-                    return -1;
+                    return -1; // Return -1 to indicate an invalid result number
                 }
             } else {
-                System.out.println("Result not ready for fetching for ID: " + resultsId.toHexString());
-                return -1;  // Returning -1 to indicate the result is not ready for fetching
+                System.out.println("No result found for ID: " + resultsId.toHexString());
+                return -1; // Returning -1 to indicate no result was found
             }
         } else {
-            System.out.println("No result found for ID: " + resultsId.toHexString());
-            return -1;  // Returning -1 to indicate no result was found
+            System.out.println("Selected player not ready for fetching or does not exist, Player ID: " + selectedPlayer.toHexString());
+            return -1; // Return -1 to indicate the selected player is not ready
         }
     }
+
+
+
+
+
 
 
 
@@ -533,7 +560,7 @@ public class Roulette extends JFrame {
     }
     
     private void randomRoll() {
-    	if (checkAllPlayersReady() && selectedPlayer == PLAYER_1_ID) {
+    	if (selectedPlayer == PLAYER_1_ID) {
 	        final int position = (int) (Math.random() * rouletteNumbers.length);  // Random position in the rouletteNumbers array
 	        boolean resultLogged = false;  // Flag to control result logging
 	        if (!resultLogged) {
@@ -575,16 +602,21 @@ public class Roulette extends JFrame {
     
 
     public void logGameResult(int resultNumber) {
-        
         MongoCollection<Document> results = database.getCollection("results");
-        Document filter = new Document("_id", resultsId);
-        Document update = new Document("$set", new Document()
-            .append("resultNumber", resultNumber)
-        	.append("readyForFetching", true));
+        MongoCollection<Document> players = database.getCollection("players");
 
-        results.updateOne(filter, update);
+        // Update the results document
+        Document resultsFilter = new Document("_id", resultsId);
+        Document resultsUpdate = new Document("$set", new Document("resultNumber", resultNumber));
+        results.updateOne(resultsFilter, resultsUpdate);
         System.out.println("Result updated: Number=" + resultNumber);
+
+        // Set 'readyForFetching' to true for every player
+        Document playersUpdate = new Document("$set", new Document("readyForFetching", true));
+        players.updateMany(new Document(), playersUpdate); // This will update all documents in the players collection
+        System.out.println("All players set to 'readyForFetching' = true.");
     }
+
 
     
 
