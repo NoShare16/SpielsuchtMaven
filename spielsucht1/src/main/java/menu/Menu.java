@@ -1,4 +1,4 @@
-package menu;
+/*package menu;
 
 import javax.swing.*;
 import java.awt.*;
@@ -788,4 +788,4 @@ class Card {
             default: throw new IllegalArgumentException("Unknown rank: " + rank);
         }
     }
-}
+} */
