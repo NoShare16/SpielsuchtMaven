@@ -308,6 +308,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
+                    updateBalanceLabel();
                     enableGameButtons(false);
                     tablePanel.repaint();
                 }
@@ -320,6 +321,7 @@ class BlackjackTable extends JFrame {
                     if (getHandValue(playerHand) < 21) {
                     	disablePlayerButtons();
                     	checkWinCondition();
+                    	updateBalanceLabel();
                     }
                     //checkWinCondition();
                     tablePanel.repaint();
@@ -338,6 +340,7 @@ class BlackjackTable extends JFrame {
                     dealerTurn();
                     disableButtonsForDoubleDown(false);  	
                     checkWinCondition();
+                    updateBalanceLabel();
                    
                     tablePanel.repaint();
                 }
@@ -385,6 +388,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
@@ -403,6 +407,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     dealerTurn();
                     checkWinCondition(false); // Check only for Hand 1
+                    updateBalanceLabel();
                     hitHand1Button.setEnabled(false);
                     standHand1Button.setEnabled(false);
                     doubleDownHand1Button.setEnabled(false);
@@ -415,6 +420,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     dealerTurn();
                     checkWinCondition(false); // Check only for Hand 2
+                    updateBalanceLabel();
                     hitHand2Button.setEnabled(false);
                     standHand2Button.setEnabled(false);
                     doubleDownHand2Button.setEnabled(false);
