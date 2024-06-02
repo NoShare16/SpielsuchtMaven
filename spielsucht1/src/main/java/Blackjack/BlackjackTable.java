@@ -166,8 +166,14 @@ class BlackjackTable extends JFrame {
          } catch (NumberFormatException e) {
              JOptionPane.showMessageDialog(this, "Invalid bet amount!");
          }
-         checkInitialBlackjack(); // Überprüfen Sie sofort nach dem Austeilen der Karten
-     }
+         checkInitialBlackjack();
+         if (getHandValue(dealerHand)==21) {
+             hitButton.setEnabled(false);
+             standButton.setEnabled(false);
+             doubleDownButton.setEnabled(false);
+             splitButton.setEnabled(false);
+         }
+    }
      
     private void resetButtons() {
         hitButton.setEnabled(true);

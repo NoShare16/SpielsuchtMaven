@@ -122,7 +122,7 @@ class BlackjackTable extends JFrame {
     // Betting related components
     private JTextField betField;
     private JLabel balanceLabel;
-    private int balance = 1000; // Initial balance
+    private int balance = 10000; // Initial balance
     private int currentBet = 0;
 
     public BlackjackTable() {
@@ -219,7 +219,13 @@ class BlackjackTable extends JFrame {
          } catch (NumberFormatException e) {
              JOptionPane.showMessageDialog(this, "Invalid bet amount!");
          }
-         checkInitialBlackjack(); // Überprüfen Sie sofort nach dem Austeilen der Karten
+         checkInitialBlackjack();
+         if (getHandValue(dealerHand)==21) {
+             hitButton.setEnabled(false);
+             standButton.setEnabled(false);
+             doubleDownButton.setEnabled(false);
+             splitButton.setEnabled(false);
+         }
      }
      
     private void resetButtons() {
@@ -348,6 +354,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
+                    updateBalanceLabel();
                     enableGameButtons(false);
                     tablePanel.repaint();
                 }
@@ -360,6 +367,7 @@ class BlackjackTable extends JFrame {
                     if (getHandValue(playerHand) < 21) {
                     	disablePlayerButtons();
                     	checkWinCondition();
+                    	updateBalanceLabel();
                     }
                     //checkWinCondition();
                     tablePanel.repaint();
@@ -425,6 +433,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
@@ -434,6 +443,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     splitHand.add(deck.dealCard());
                     checkSplitHand();
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
@@ -443,6 +453,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     dealerTurn();
                     checkWinCondition(false); // Check only for Hand 1
+                    updateBalanceLabel();
                     hitHand1Button.setEnabled(false);
                     standHand1Button.setEnabled(false);
                     doubleDownHand1Button.setEnabled(false);
@@ -455,6 +466,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     dealerTurn();
                     checkWinCondition(true); // Check only for Hand 2
+                    updateBalanceLabel();
                     tablePanel.repaint();
                 }
             });
