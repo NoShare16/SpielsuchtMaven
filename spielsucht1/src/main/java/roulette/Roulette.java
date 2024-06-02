@@ -47,6 +47,7 @@ public class Roulette extends JFrame {
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
     private ObjectId selectedPlayer;
+    private double balance1, balance2, balance3, balance4;
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -209,22 +210,33 @@ public class Roulette extends JFrame {
         return true; 
     }
     
-    public void updateBalance() {
-    	MongoCollection<Document> players = database.getCollection("players");
-        Document playerDocument = players.find(eq("_id", selectedPlayer)).first();
-        
-        if (playerDocument != null) {
-            Double fetchedBalance = playerDocument.getDouble("balance");
-            if (fetchedBalance != null) {
-                balance = fetchedBalance; // Update the class variable
-                System.out.println("Updated balance for selected player: " + balance);
+    public void updateAllBalances() {
+        MongoCollection<Document> players = database.getCollection("players");
+        ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
+        double[] balances = new double[4];
+
+        for (int i = 0; i < playerIds.length; i++) {
+            Document playerDocument = players.find(eq("_id", playerIds[i])).first();
+            if (playerDocument != null) {
+                Double fetchedBalance = playerDocument.getDouble("balance");
+                if (fetchedBalance != null) {
+                    balances[i] = fetchedBalance;
+                    System.out.println("Fetched balance for player " + (i + 1) + ": " + balances[i]);
+                } else {
+                    System.out.println("Balance not set for player ID: " + playerIds[i].toHexString());
+                }
             } else {
-                System.out.println("Balance not set for player ID: " + selectedPlayer.toHexString());
+                System.out.println("No player found with ID: " + playerIds[i].toHexString());
             }
-        } else {
-            System.out.println("No player found with ID: " + selectedPlayer.toHexString());
         }
+
+        // Assign fetched balances to specific variables
+        balance1 = balances[0];
+        balance2 = balances[1];
+        balance3 = balances[2];
+        balance4 = balances[3];
     }
+
 
     
     public void startReadyCheckPolling() {
@@ -244,7 +256,7 @@ public class Roulette extends JFrame {
             }
             
             fetchResults();
-            updateBalance();
+            updateAllBalances();
             
         };
         scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 3, TimeUnit.SECONDS);
