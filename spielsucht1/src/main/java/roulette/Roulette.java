@@ -76,6 +76,7 @@ public class Roulette extends JFrame {
     private double balance = 1000.00;
     private double bet;
     private JTextField EinsatzFeld = new JTextField();
+    private JLabel showPlayerInfo = new JLabel("\n" + "Balance: " + Double.toString(balance));
 
     public Roulette() {
 
@@ -115,6 +116,9 @@ public class Roulette extends JFrame {
         roulettePanel.add(EinsatzLabel);
         EinsatzFeld.setBounds(800, 462, 100, 25);
         roulettePanel.add(EinsatzFeld);
+        showPlayerInfo.setBounds(10, 10, 200, 20);
+        showPlayerInfo.setForeground(Color.WHITE);
+        roulettePanel.add(showPlayerInfo);
         drawButtons(); // Füge die Buttons zur Roulette-Tafel hinzu
         pack();
         setLocationRelativeTo(null);
@@ -194,7 +198,7 @@ public class Roulette extends JFrame {
                 System.out.println("All players are ready. Starting game...");
                 // Potentially trigger an action to start the game
                 randomRoll();
-                updatePlayerData(selectedPlayer,balance, false);
+                
             } else {
                 System.out.println("Not all players are ready.");
             }
