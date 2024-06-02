@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 
 
 class BlackjackTable extends JFrame {
+	
     private final Deck deck;
     private final List<Card> playerHand;
     public List<Card> getPlayerHand() {
@@ -41,7 +42,7 @@ class BlackjackTable extends JFrame {
    
   
     	public boolean isSplit() {
-    		return isSplit();
+    		return false;
     	}
     
     
@@ -70,6 +71,7 @@ class BlackjackTable extends JFrame {
     private int currentBet = 0;
 
     public BlackjackTable() {
+    	
         setTitle("Blackjack Table");
         setSize(1640, 924);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -85,6 +87,7 @@ class BlackjackTable extends JFrame {
 
         // Setup UI
         tablePanel = new TablePanel();
+        tablePanel.setBlackjackTable(this);
         setLayout(new BorderLayout());
         add(tablePanel, BorderLayout.CENTER);
 
@@ -596,7 +599,7 @@ private void checkPlayerHand() {
         }
     }
 
-    Map<String, BufferedImage> loadCardImages() {
+    public Map<String, BufferedImage> loadCardImages() {
         Map<String, BufferedImage> cardImages = new HashMap<>();
         String[] suits = {"clubs", "diamonds", "hearts", "spades"};
         String[] ranks = {"two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king", "ace"};

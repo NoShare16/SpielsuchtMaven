@@ -16,7 +16,10 @@ import javax.swing.JPanel;
 
 
 class TablePanel extends JPanel {
-	BlackjackTable blackjacktable = new BlackjackTable(); 
+	BlackjackTable blackjacktable;
+	public void setBlackjackTable(BlackjackTable bjt) {
+		this.blackjacktable = bjt;
+	}
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
