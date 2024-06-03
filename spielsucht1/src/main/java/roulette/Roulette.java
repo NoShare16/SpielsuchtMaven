@@ -519,6 +519,7 @@ public class Roulette extends JFrame {
                 balance = balance - bet;
                 updatePlayerData(selectedPlayer, balance, true);
                 System.out.println(balance);
+                
                
             }
         });
@@ -700,9 +701,13 @@ public class Roulette extends JFrame {
         	balance = balance + bet*3;
         } else if (Eingabe == isBetween(Integer.parseInt(rouletteNumbers[resultIndex]))) {
         	balance = balance + bet*3;
-        } else
+        } else 
         	bet = 0;
         updatePlayerData(selectedPlayer,balance, false);
+        if (bet == 0) 
+        	JOptionPane.showMessageDialog(null, "Leider verloren!");
+        else
+        	JOptionPane.showMessageDialog(null,  "Sie haben " + bet + "gewonnen!");
     }
     
     public static void main(String[] args) {
