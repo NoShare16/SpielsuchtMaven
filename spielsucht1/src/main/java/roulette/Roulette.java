@@ -225,6 +225,7 @@ public class Roulette extends JFrame {
                 if (fetchedBalance != null) {
                     balances[i] = fetchedBalance;
                     showPlayerInfo[i].setText("<html>" + playerOptions[i] + "<p/>Balance: " + Double.toString(balances[i]) + "</html>");
+                    balance = balances[i];
                     System.out.println("Fetched balance for player " + (i + 1) + ": " + balances[i]);
                 } else {
                     System.out.println("Balance not set for player ID: " + playerIds[i].toHexString());
@@ -235,7 +236,7 @@ public class Roulette extends JFrame {
         }
 
         // Assign fetched balances to specific variables
-        balance = balances[0];
+        
         
     }
 
