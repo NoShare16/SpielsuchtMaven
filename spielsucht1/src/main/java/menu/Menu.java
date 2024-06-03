@@ -357,6 +357,7 @@ class BlackjackTable extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     playerHand.add(deck.dealCard());
                     checkPlayerHand();
+                    updateBalanceLabel();
                     enableGameButtons(false);
                     tablePanel.repaint();
                 }
