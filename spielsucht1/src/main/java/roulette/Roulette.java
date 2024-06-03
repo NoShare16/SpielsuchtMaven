@@ -156,6 +156,11 @@ public class Roulette extends JFrame {
         setVisible(true);
     }
     
+    public boolean soloMode() {
+    	boolean mode = false;
+    	return mode;
+    }
+    
     
     
     public void settingAllfalse() {
@@ -242,26 +247,29 @@ public class Roulette extends JFrame {
 
     
     public void startReadyCheckPolling() {
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        Runnable checkReadyStatusTask = () -> {
-        	
-            System.out.println("Checking if all players are ready...");
-            boolean allReady = checkAllPlayersReady();            
-            
-            
-            if (allReady) {
-                System.out.println("All players are ready. Starting game...");
-                randomRoll();
+    	if(!soloMode()) {
+    		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            Runnable checkReadyStatusTask = () -> {
+            	
+                System.out.println("Checking if all players are ready...");
+                boolean allReady = checkAllPlayersReady();            
                 
-            } else {
-                System.out.println("Not all players are ready.");
-            }
-            
-            fetchResults();
-            updateAllBalances();
-            
-        };
-        scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 3, TimeUnit.SECONDS);
+                
+                if (allReady) {
+                    System.out.println("All players are ready. Starting game...");
+                    randomRoll();
+                    
+                } else {
+                    System.out.println("Not all players are ready.");
+                }
+                
+                fetchResults();
+                updateAllBalances();
+                
+            };
+            scheduler.scheduleAtFixedRate(checkReadyStatusTask, 0, 3, TimeUnit.SECONDS);
+    	}
+        
     }
     
     public int fetchResults() {
@@ -517,7 +525,13 @@ public class Roulette extends JFrame {
                 
                 bet = Double.valueOf(EinsatzFeld.getText());
                 balance = balance - bet;
-                updatePlayerData(selectedPlayer, balance, true);
+                
+                if (!soloMode()) {
+                	updatePlayerData(selectedPlayer, balance, true);
+                } else {
+                	randomRoll();
+                }
+                
                 System.out.println(balance);
                 
                
@@ -632,10 +646,14 @@ public class Roulette extends JFrame {
 	        boolean resultLogged = false; 
 	        if (!resultLogged) {
 	            System.out.println("Random roll result: " + rouletteNumbers[position]);
-	           
-	            logGameResult(position);
-	              
-	              
+	            
+	            if (!soloMode()) {
+	            	logGameResult(position);
+	            } else {
+	            	spinRoulette(position);
+	            }
+	            
+ 
 	            
 	            resultLogged = true; 
 	        }
@@ -663,6 +681,7 @@ public class Roulette extends JFrame {
             }
         });
         timer.start();
+        calculateBalance(position);
         
     }
 
@@ -710,7 +729,10 @@ public class Roulette extends JFrame {
         	win = false;
         	bet = 0;
         }
-        updatePlayerData(selectedPlayer,balance, false);
+        if(!soloMode()) {
+        	updatePlayerData(selectedPlayer,balance, false);
+        }
+        
         
     }
     
