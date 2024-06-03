@@ -47,7 +47,7 @@ public class Roulette extends JFrame {
     private static final ObjectId PLAYER_3_ID = new ObjectId("66560a6c6ab1d7f2d5fbc328");
     private static final ObjectId PLAYER_4_ID = new ObjectId("66560a6e6ab1d7f2d5fbc329");
     private ObjectId selectedPlayer;
-    private double balance1, balance2, balance3, balance4;
+    
     
     private JLabel resultLabel;
     private JPanel roulettePanel;
@@ -76,7 +76,7 @@ public class Roulette extends JFrame {
     private double balance;
     private double bet;
     private JTextField EinsatzFeld = new JTextField();
-    private JLabel showPlayerInfo;
+    private JLabel[] showPlayerInfo = new JLabel[4];
     String[] playerOptions = {"Player 1", "Player 2", "Player 3", "Player 4"};
     JComboBox playerComboBox = new JComboBox<>(playerOptions);
 
@@ -109,11 +109,14 @@ public class Roulette extends JFrame {
         roulettePanel.add(EinsatzLabel);
         EinsatzFeld.setBounds(800, 462, 100, 25);
         roulettePanel.add(EinsatzFeld);
-        showPlayerInfo = new JLabel("\n" + "Balance: " + Double.toString(balance));
-        showPlayerInfo.setBounds(10, 10, 200, 20);
-        showPlayerInfo.setForeground(Color.WHITE);
-        showPlayerInfo.setFont(font);
-        roulettePanel.add(showPlayerInfo);
+        for (int i = 0; i < showPlayerInfo.length; i++) {
+        	showPlayerInfo[i] = new JLabel();
+        	showPlayerInfo[i].setBounds(300*i+10, 10, 200, 50);
+        	showPlayerInfo[i].setForeground(Color.WHITE);
+        	showPlayerInfo[i].setFont(font);
+            roulettePanel.add(showPlayerInfo[i]);
+        }
+        
         drawButtons();
 
         selectButton.addActionListener(new ActionListener() {
@@ -221,6 +224,7 @@ public class Roulette extends JFrame {
                 Double fetchedBalance = playerDocument.getDouble("balance");
                 if (fetchedBalance != null) {
                     balances[i] = fetchedBalance;
+                    showPlayerInfo[i].setText("<html>" + playerOptions[i] + "<p/>Balance: " + Double.toString(balances[i]) + "</html>");
                     System.out.println("Fetched balance for player " + (i + 1) + ": " + balances[i]);
                 } else {
                     System.out.println("Balance not set for player ID: " + playerIds[i].toHexString());
@@ -231,10 +235,8 @@ public class Roulette extends JFrame {
         }
 
         // Assign fetched balances to specific variables
-        balance1 = balances[0];
-        balance2 = balances[1];
-        balance3 = balances[2];
-        balance4 = balances[3];
+        balance = balances[0];
+        
     }
 
 
