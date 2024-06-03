@@ -79,7 +79,7 @@ public class Roulette extends JFrame {
     private JLabel[] showPlayerInfo = new JLabel[4];
     String[] playerOptions = {"Player 1", "Player 2", "Player 3", "Player 4"};
     JComboBox playerComboBox = new JComboBox<>(playerOptions);
-
+    private boolean win;
     public Roulette() {
         setTitle("Animated Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -653,9 +653,10 @@ public class Roulette extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
                 if (angle >= position * (360.0 / rouletteNumbers.length) + 720) {
-                    if (!resultLogged) {  
-                        
-                    }
+                	if (win == false) 
+                    	JOptionPane.showMessageDialog(null, "Leider verloren!");
+                    else
+                    	JOptionPane.showMessageDialog(null,  "Sie haben gewonnen!");
                     timer.stop(); 
                 }
                 roulettePanel.repaint();
@@ -694,20 +695,23 @@ public class Roulette extends JFrame {
         if(Eingabe == rouletteNumbers[resultIndex]) {
         	balance = balance + bet*35;
         } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
+        	win = true;
         	balance = balance + bet*2;
         } else if (Eingabe == isEven(rouletteNumbers[resultIndex])) {
+        	win = true;
         	balance = balance + bet*2;
         } else if (Eingabe == twotoone(rouletteNumbers[resultIndex])) {
+        	win = true;
         	balance = balance + bet*3;
         } else if (Eingabe == isBetween(Integer.parseInt(rouletteNumbers[resultIndex]))) {
+        	win = true;
         	balance = balance + bet*3;
-        } else 
+        } else {
+        	win = false;
         	bet = 0;
+        }
         updatePlayerData(selectedPlayer,balance, false);
-        if (bet == 0) 
-        	JOptionPane.showMessageDialog(null, "Leider verloren!");
-        else
-        	JOptionPane.showMessageDialog(null,  "Sie haben " + bet + "gewonnen!");
+        
     }
     
     public static void main(String[] args) {
