@@ -79,11 +79,13 @@
 	    private boolean solomode;
 	    public Logic() {
 	    	initMongoDB();
+	    	settingAllfalse();
 	    	GamePollingService service = new GamePollingService();
-            startReadyCheckPolling();
-            settingAllfalse();
+	    	startReadyCheckPolling();
             
-	    }
+        }
+            
+	    
 	    
 	    public void setView(View view) {
 	    	this.v = view;
@@ -147,7 +149,7 @@
 	   
 	  
 	    
-	    private void initMongoDB() {
+	    void initMongoDB() {
 	        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); 
 	        database = mongoClient.getDatabase("Roulette");
 	        players = database.getCollection("players");

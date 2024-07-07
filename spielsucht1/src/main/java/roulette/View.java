@@ -64,6 +64,7 @@ public class View extends JFrame {
     	setTitle("Roulette");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
+        
         add(gameComboBox);
         gameComboBox.addItemListener (new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -118,6 +119,7 @@ public class View extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 l.setPlayer(gameComboBox.getSelectedIndex());
+                setSoloMode();
                 drawPlayerInfo();
                 getContentPane().removeAll();
                 setLayout(new BorderLayout());
@@ -128,8 +130,8 @@ public class View extends JFrame {
                 validate();
                 repaint();
                 setLocationRelativeTo(null);
-                
             }
+                
         });
 
         pack();
