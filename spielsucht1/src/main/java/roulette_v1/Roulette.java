@@ -36,7 +36,7 @@
 
 	public class Roulette extends JFrame {
 		
-		 private GamePollingService gamePollingService;
+		private GamePollingService gamePollingService;
 
 		private MongoClient mongoClient;
 	    private MongoDatabase database;
@@ -51,7 +51,7 @@
 	    private ObjectId selectedPlayer;
 	    
 	    
-	    private JLabel resultLabel;
+	    
 	    private JPanel roulettePanel;
 	    private String[] rouletteNumbers = {"0", "32", "15", "19", "4", "21", "2", "25", "17", "34", "6", "27",
 	                                        "13", "36", "11", "30", "8", "23", "10", "5", "24", "16", "33",
@@ -66,35 +66,33 @@
 	    private String[] column1_34 = {"1", "4", "7", "10", "13", "16", "19", "22", "25", "28", "31", "34"};
 	    private String[] column2_35 = {"2", "5", "8", "11", "14", "17", "20", "23", "26", "29", "32", "35"};
 	    private String[] column3_36 = {"3", "6", "9", "12", "15", "18", "21", "24", "27", "30", "33", "36"};
-	    
+	    //Container, die für die Ergebnisabfrage benoetigt werden
 	    private int angle = 0;
-	    private Timer timer;
-	    private String Eingabe;
+	    private Timer timer; //Timer, welcher für die Animation der Rouletteoberflaeche verantworlicht ist 
+	    private String Eingabe; //Variable für die Speicherung der Wette
 	    private Color Green = new Color(0, 102, 0);
 	    private Color DarkRed = new Color(153, 0, 0);
 	    private Border buttonBorder = new LineBorder(Color.WHITE, 1);
 	    private  Font font = new Font("Times New Roman", Font.BOLD, 20);
-	    private boolean readyState = false;
 	    private double balance;
-	    private double bet;
+	    private double bet; //Variable zur Berechnung der entstehenden Balance
 	    private JTextField EinsatzFeld = new JTextField();
-	    private JLabel[] showPlayerInfo = new JLabel[4];
-	    String[] playerOptions = {"Player 1", "Player 2", "Player 3", "Player 4"};
-	    JComboBox playerComboBox = new JComboBox<>(playerOptions);
-	    private boolean win;
-	    String[] gameOptions = {"Singleplayer", "Multiplayer"};
-	    JComboBox gameComboBox = new JComboBox<>(gameOptions);
-	    JButton startButton = new JButton("Start Game");
-	    ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
-	    double[] balances = new double[4];
-	    Timer ausgabe;
+	    private JLabel[] showPlayerInfo = new JLabel[4];//Container für Anzeige der Spielerdaten
+	    private String[] playerOptions = {"Player 1", "Player 2", "Player 3", "Player 4"};
+	    private JComboBox playerComboBox = new JComboBox<>(playerOptions); //ComboBox zur Auswahl des Spielers im Multiplayer
+	    private String[] gameOptions = {"Singleplayer", "Multiplayer"};
+	    private JComboBox gameComboBox = new JComboBox<>(gameOptions); //ComboBox zur Auswahl des Spielmodus
+	    private JButton startButton = new JButton("Start Game");
+	    private ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
+	    private double[] balances = new double[4]; //Zur Wiedergabe aller Balances der Spieler 
+	    private int rrcounter; //Zaehler, damit RandomRoll() nicht mehrfach ausgelöst wird
+	    private Timer ausgabe;
 	    public Roulette() {
-	    	setTitle("Animated Roulette");
+	    	setTitle("Roulette");
 	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        initMongoDB();
 	        setLayout(new FlowLayout());
 	        add(gameComboBox);
-	        gameComboBox.addItemListener (new ItemListener() {
+	        gameComboBox.addItemListener (new ItemListener() { //(mit Update dazu gekommen) Abfrage für Anpassung des Optionsfensters
 				public void itemStateChanged(ItemEvent e) {
 					if (gameComboBox.getSelectedIndex() == 1){
 						setLayout(new FlowLayout());
@@ -160,6 +158,7 @@
 	                        selectedPlayer = PLAYER_4_ID;
 	                        break;
 	                }
+	                initMongoDB();
 	                settingAllfalse();
 	                drawPlayerInfo();
 	                getContentPane().removeAll();
@@ -181,7 +180,7 @@
 	        setVisible(true);
 	    }
 	    
-	    public boolean soloMode() {
+	    public boolean soloMode() { //(mit Update dazugekommen) Methode zur Einstellung einer Singleplayer Sitzung
 	    	if (gameComboBox.getSelectedIndex() == 1)
 	    		return false;
 	    	else {
@@ -192,7 +191,7 @@
 	    
 	    
 	    
-	    public void settingAllfalse() {
+	    public void settingAllfalse() { //Setzt abhängig des Spielmodus die Statuswerte zurück
 	    	if(selectedPlayer == PLAYER_1_ID) {
 	    		updatePlayerData(PLAYER_1_ID, 1000, false);
 	            updatePlayerData(PLAYER_2_ID, 1000, false);
@@ -205,13 +204,13 @@
 	   
 	  
 	    
-	    private void initMongoDB() {
+	    private void initMongoDB() { //Initiert die Datenbank zur Übermittlung der Daten unter den Spielern
 	        mongoClient = MongoClients.create(Config.MONGO_CONNECTION_STRING); 
 	        database = mongoClient.getDatabase("Roulette");
 	        players = database.getCollection("players");
 	    }
 	    
-	    private void updatePlayerData(ObjectId playerId, double change, boolean readyState) {
+	    private void updatePlayerData(ObjectId playerId, double change, boolean readyState) { //Aktualisiert die Spielerdaten innerhalb der Datenbank
 	        Document player = players.find(new Document("_id", playerId)).first();
 	        if (player != null) {
 	            double currentBalance = player.getDouble("balance");
@@ -225,7 +224,7 @@
 	        }
 	    }
 
-	    private boolean checkAllPlayersReady() {
+	    private boolean checkAllPlayersReady() { //Prüft, ob alle Spieler eine Eingabe getaetigt haben
 	        ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
 	        MongoCollection<Document> players = database.getCollection("players");
 	        for (ObjectId playerId : playerIds) {
@@ -237,7 +236,7 @@
 	        return true; 
 	    }
 	    
-	    private boolean checkPlayerFetching() {
+	    private boolean checkPlayerFetching() { //Prüft, ob alle Spieler bereit sind, bevor die Animation beginnt
 	    	ObjectId[] playerIds = {PLAYER_1_ID, PLAYER_2_ID, PLAYER_3_ID, PLAYER_4_ID};
 	    	MongoCollection<Document> players = database.getCollection("players");
 	    	for (ObjectId playerId : playerIds) {
@@ -249,7 +248,7 @@
 	        return true; 
 	    }
 	    
-	    public void updateAllBalances() {
+	    public void updateAllBalances() { //Aktualisiert die Balances aller Spieler auf dem Client anhand der Daten aus der Datenbank
 	    	if(!soloMode()) {
 		        MongoCollection<Document> players = database.getCollection("players");
 		        
@@ -277,7 +276,7 @@
 		        
 		    }
 	    
-	    public void drawPlayerInfo() {
+	    public void drawPlayerInfo() { //Zeichnet die Spielerdaten auf der Oberflaeche
 	    	if (gameComboBox.getSelectedIndex() == 1) {
 	    		for (int i = 0; i < playerIds.length; i++) {
 	    			showPlayerInfo[i].setText("<html>" + playerOptions[i] + "<p/>Balance: " + Double.toString(balances[i]) + "</html>");
@@ -288,7 +287,7 @@
 
 
 	    
-	    public void startReadyCheckPolling() {
+	    public void startReadyCheckPolling() {//Ein Schedular, welcher die Statusabfrage des readyStatus initiert und bei Erfüllung der Kondition die Runde startet 
 	    	if(!soloMode()) {
 	    		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 	            Runnable checkReadyStatusTask = () -> {
@@ -297,7 +296,7 @@
 	                boolean allReady = checkAllPlayersReady();            
 	                
 	                
-	                if (allReady) {
+	                if (allReady && rrcounter == 0) {
 	                    System.out.println("All players are ready. Starting game...");
 	                    randomRoll();
 	                    
@@ -314,7 +313,7 @@
 	        
 	    }
 	    
-	    public int fetchResults() {
+	    public int fetchResults() {//entnimmt Daten aus der Datenbank, somit jeder Spieler das gleiche Ergebnis erhält
 	        MongoCollection<Document> players = database.getCollection("players");
 	        MongoCollection<Document> results = database.getCollection("results");
 
@@ -327,7 +326,7 @@
 	                int result = resultDocument.getInteger("resultNumber", -1);
 	                if (result != -1) {
 	                    // Process the result
-	                    calculateBalance(result);
+	                    
 	                    spinRoulette(result);
 
 	                    // Update the 'readyForFetching' flag for the selected player to false
@@ -352,22 +351,14 @@
 
 
 
-
-
-
-
-
-
-
-
-	    @Override
-	    public void dispose() {
+	    
+	    public void dispose() {//dient zur Freigabe von Ressourcen, wenn sie nicht mehr benötigt werden
 	        super.dispose();
 	        if (mongoClient != null) {
 	            mongoClient.close();
 	        }
 	    }
-	    private void drawButtons() {
+	    private void drawButtons() {//Zeichnet alle Aktionsbuttons der Oberflaeche
 	        JButton[] rouletteButtons = new JButton[37];
 	        for (int i = 0; i < rouletteButtons.length; i++) {
 	            rouletteButtons[i] = new JButton("" + i);
@@ -563,7 +554,7 @@
 	        roulettePanel.add(readyButton);
 	        readyButton.setBounds(930, 450, 100, 50);
 	        readyButton.addActionListener(new ActionListener() {
-	            public void actionPerformed(ActionEvent e) {
+	            public void actionPerformed(ActionEvent e) {//bei der Betaetigung des Buttons wird der Einsatz in eine Variable gefüllt und weiterverarbeitet
 	                bet = Double.valueOf(EinsatzFeld.getText());
 	                balance = balance - bet;
 	                drawPlayerInfo();
@@ -582,55 +573,9 @@
 
 	    }
 
-	    private String isRed(String number) {
-	        for (String redNumber : redNumbers) {
-	            if (number.equals(redNumber))
-	                return "Red";
-	        }
-	        return "Black";
-	    }
 	    
-	    private String isEven(String input) {
-	    	int number = Integer.parseInt(input);
-	    	double result = number % 2;
-	    	if (result == 0) {
-	    		return "Even";
-	    	}
-	    	return "Odd";
-	    }
 	    
-	    private String twotoone (String Input) {
-	    	for (String columnNumber : column1_34) {
-	            if (Input.equals(columnNumber))
-	                return "1-34";
-	        }
-	    	for (String columnNumber : column2_35) {
-	            if (Input.equals(columnNumber))
-	                return "2-35";
-	        }
-	    	for (String columnNumber : column3_36) {
-	            if (Input.equals(columnNumber))
-	                return "3-36";
-	        }
-	    	return "";
-	    }
-	    
-	    private String isBetween (int input) {
-	    	if (1 <= input && input <= 12) {
-	    		return "1st 12";
-	    	} else if (13 <= input && input <= 24) {
-	    		return "2nd 12";
-	    	} else if (25 <= input && input <= 36) {
-	    		return "3rd 12";
-	    	} else if (1 <= input && input <= 18) {
-	    		return "1 to 18";
-	    	} else if (19 <= input && input <= 36) {
-	    		return "19 to 36";
-	    	}
-	    	return "";
-	    }
-	    
-	    private void drawRoulette(Graphics g) {
+	    private void drawRoulette(Graphics g) {//Zeichnet die Rouletteoberflaeche
 	        int radius = 170;
 	        int centerX = roulettePanel.getWidth() / 6;
 	        int centerY = roulettePanel.getHeight() / 2;
@@ -668,7 +613,7 @@
 	        
 	    }
 
-	    private void drawBall(Graphics g) {
+	    private void drawBall(Graphics g) {//Zeichnet die Kugel, der Rouletteoberflaeche
 	        int radius = 10;
 	        int centerX = roulettePanel.getWidth() / 6;
 	        int centerY = roulettePanel.getHeight() / 2;
@@ -681,7 +626,7 @@
 	        g.fillOval(ballX - radius, ballY - radius, radius * 2, radius * 2);
 	    }
 	    
-	    private void randomRoll() {
+	    private void randomRoll() {//Erzeugt eine zufaellige Zahl, die den Index ergibt für den Container 'rouletteNumbers' und gibt diesen Index an die Datenbank weiter
 	    	if (selectedPlayer == PLAYER_1_ID) {
 		        final int position = (int) (Math.random() * rouletteNumbers.length);  
 		        boolean resultLogged = false; 
@@ -690,22 +635,25 @@
 		            
 		            if (!soloMode()) {
 		            	logGameResult(position);
-		            } else {
-		            	spinRoulette(position);
+		            	rrcounter++;
 		            }
 		            
 	 
 		            
 		            resultLogged = true; 
 		        }
+		        if (soloMode()) {
+	            	spinRoulette(position);
+	            }
 	    	} else {
 	    		System.out.println("Not all players are ready.");
 	    	}
+	    	
 	    }
 	    
 	    
 	    
-	    private void spinRoulette(int position) {
+	    private void spinRoulette(int position) {//Entstehung der Animation und Weiterleitung zur Ergebnisberechnung
 	        angle = 0;
 	        timer = new Timer(15, new ActionListener() {
 	            private boolean resultLogged = false;  
@@ -726,7 +674,7 @@
 
 	    
 
-	    public void logGameResult(int resultNumber) {
+	    public void logGameResult(int resultNumber) {//aktualisiert das Spielergebnis in der Datenbank
 	        MongoCollection<Document> results = database.getCollection("results");
 	        MongoCollection<Document> players = database.getCollection("players");
 
@@ -743,16 +691,11 @@
 	    }
 
 
-	    
-
-	    
-
-
-	    private void calculateBalance(int resultIndex) {
+	    private void calculateBalance(int resultIndex) {//Berechnet des Ergebnis des Spielers
 	    	
-	    	ausgabe = new Timer(2, new ActionListener() {
+	    	ausgabe = new Timer(2, new ActionListener() {//Timer, damit die Animation vollständig enden kann
 	    		public void actionPerformed(ActionEvent e) {
-			        if(Eingabe == rouletteNumbers[resultIndex]) {
+			      if(Eingabe == rouletteNumbers[resultIndex]) {
 			        	JOptionPane.showMessageDialog(null,  "Sie haben gewonnen!");
 			        	balance = balance + bet*35;
 			        } else if(Eingabe == isRed(rouletteNumbers[resultIndex])) {
@@ -774,11 +717,60 @@
 			        if(!soloMode()) {
 			        	updatePlayerData(selectedPlayer,balance, false);
 			        }
+			        rrcounter = 0;
 			        drawPlayerInfo();
 			        ausgabe.stop();
 	    		}
 	    	});
 	        ausgabe.start();
+	    }
+	    
+	    private String isRed(String number) {//Prüft, ob eine Zahl rot ist
+	        for (String redNumber : redNumbers) {
+	            if (number.equals(redNumber))
+	                return "Red";
+	        }
+	        return "Black";
+	    }
+	    
+	    private String isEven(String input) {//Prüft, ob eine Zahl gerade ist
+	    	int number = Integer.parseInt(input);
+	    	double result = number % 2;
+	    	if (result == 0) {
+	    		return "Even";
+	    	}
+	    	return "Odd";
+	    }
+	    
+	    private String twotoone (String Input) {//Prüft die Zahlenraeume der Oberflaeche
+	    	for (String columnNumber : column1_34) {
+	            if (Input.equals(columnNumber))
+	                return "1-34";
+	        }
+	    	for (String columnNumber : column2_35) {
+	            if (Input.equals(columnNumber))
+	                return "2-35";
+	        }
+	    	for (String columnNumber : column3_36) {
+	            if (Input.equals(columnNumber))
+	                return "3-36";
+	        }
+	    	return "";
+	    }
+	    
+	    private String isBetween (int input) {//Prüft die Zahlenraeume der Oberflaeche
+	    	if (1 <= input && input <= 12) {
+	    		return "1st 12";
+	    	} else if (13 <= input && input <= 24) {
+	    		return "2nd 12";
+	    	} else if (25 <= input && input <= 36) {
+	    		return "3rd 12";
+	    	} else if (1 <= input && input <= 18) {
+	    		return "1 to 18";
+	    	} else if (19 <= input && input <= 36) {
+	    		return "19 to 36";
+	    	}
+	    	return "";
 	    }
 	    
 	    public static void main(String[] args) {

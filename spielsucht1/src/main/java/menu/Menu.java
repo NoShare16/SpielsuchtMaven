@@ -2,7 +2,7 @@ package menu;
 
 import javax.swing.*;
 
-import roulette.Roulette;
+import roulette_v2.Roulette;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
