@@ -76,13 +76,14 @@
 	    private double[] balances = new double[4];
 	    Timer ausgabe;
 	    private View v;
-	    private boolean solomode;
+	    private boolean solomode = true;
 	    public Logic() {
 	    	initMongoDB();
-	    	settingAllfalse();
+	    		
 	    	GamePollingService service = new GamePollingService();
 	    	startReadyCheckPolling();
-            
+	    	
+	    	settingAllfalse();
         }
             
 	    
@@ -144,6 +145,7 @@
 	    	}
 	    	if (solomode == true)
 	    		balance = 1000;
+	    	
 	    	
 	    }
 	   

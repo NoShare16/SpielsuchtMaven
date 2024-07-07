@@ -430,7 +430,7 @@ public class View extends JFrame {
 	
 	void spinRoulette(int position) {
         angle = 0;
-        timer = new Timer(15, new ActionListener() {
+        timer = new Timer(20, new ActionListener() {
             private boolean resultLogged = false;  
             public void actionPerformed(ActionEvent e) {
                 angle += 5;
