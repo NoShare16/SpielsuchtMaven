@@ -288,12 +288,12 @@
 	        }
 	    }
 
-	    public void dispose() {
-	    	super.dispose();
-	        if (mongoClient != null) {
-	            mongoClient.close();
-	        }
-	    }
+//	    public void dispose() {
+//	    	super.dispose();
+//	        if (mongoClient != null) {
+//	            mongoClient.close();
+//	        }
+//	    }
 
 	   public String isRed(String number) {
 	        for (String redNumber : redNumbers) {

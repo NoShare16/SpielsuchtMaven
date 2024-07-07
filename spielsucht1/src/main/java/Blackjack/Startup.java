@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import roulette_v2.Roulette;
+import roulette_v1.Roulette;
 
 public class Startup extends JFrame {
 
